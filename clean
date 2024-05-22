@@ -1,0 +1,5 @@
+#!/bin/bash
+
+rm -f *.class *.interp *.tokens JavaLexer.java JavaParser.java JavaParserBaseVisitor.java JavaParserVisitor.java
+
+

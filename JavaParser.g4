@@ -60,16 +60,16 @@ modifier
     ;
 
 classOrInterfaceModifier
-    : annotation
-    | PUBLIC
-    | PROTECTED
-    | PRIVATE
-    | STATIC
-    | ABSTRACT
-    | FINAL    // FINAL for class only -- does not apply to interfaces
-    | STRICTFP
-    | SEALED // Java17
-    | NON_SEALED // Java17
+    : annotation                                                            //#annotate
+    | PUBLIC                                                                //#pubmod
+    | PROTECTED                                                             //#protmod
+    | PRIVATE                                                               //#privmod
+    | STATIC                                                                //#statmod
+    | ABSTRACT                                                              //#abstrmod
+    | FINAL    /* FINAL for class only -- does not apply to interfaces */   //#finmod
+    | STRICTFP                                                              //#strimod
+    | SEALED /* Java17 */                                                   //#sealmod
+    | NON_SEALED /* Java17 */                                               //#nsealmod
     ;
 
 variableModifier

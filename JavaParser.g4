@@ -150,7 +150,7 @@ memberDeclaration
    for invalid return type after parsing.
  */
 methodDeclaration
-    : typeTypeOrVoid identifier formalParameters ('[' ']')*
+    : typeTypeOrVoid identifier formalParameters (LBRACK RBRACK)*
       (THROWS qualifiedNameList)?
       methodBody
     ;

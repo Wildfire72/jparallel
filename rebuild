@@ -1,3 +1,4 @@
 bash clean
 bash build
-java Main Hello.java
+java Main Hello.java 
+javac Hello1.java && java Hello1

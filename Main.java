@@ -13,10 +13,13 @@ public class Main {
 
         FileWriter file = null;
         PrintWriter out = null;
+        String outfile = null;
 
         for (int i = 0; i < args.length; i++) {
             if (!args[i].contains(".java")) {
                 continue;
+            } else {
+                outfile = args[i].substring(0, args[i].length() - 5) + "1.java";
             }
             JavaLexer lexer = null;
             try {
@@ -33,7 +36,7 @@ public class Main {
             }
 
             try {
-                file = new FileWriter("out.java");
+                file = new FileWriter(outfile);
                 out = new PrintWriter(file);
 
             } catch (IOException e) {

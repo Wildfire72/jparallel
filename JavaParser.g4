@@ -307,13 +307,13 @@ qualifiedName
     ;
 
 literal
-    : integerLiteral
-    | floatLiteral
-    | CHAR_LITERAL
-    | STRING_LITERAL
-    | BOOL_LITERAL
-    | NULL_LITERAL
-    | TEXT_BLOCK // Java17
+    : integerLiteral                                        #intLit
+    | floatLiteral                                          #floatLit
+    | CHAR_LITERAL                                          #charLit
+    | STRING_LITERAL                                        #stringLit
+    | BOOL_LITERAL                                          #boolLit
+    | NULL_LITERAL                                          #nullLit
+    | TEXT_BLOCK /* Java17 */                               #txtBlocLit
     ;
 
 integerLiteral
@@ -588,8 +588,8 @@ methodCall
 expression
     // Expression order in accordance with https://introcs.cs.princeton.edu/java/11precedence/
     // Level 16, Primary, array and member access
-    : primary
-    | expression '[' expression ']'
+    : primary                                                                               #primaryExpr
+    | expression '[' expression ']'                                                         #brackExpr
     | expression bop='.'
       (
          identifier
@@ -598,45 +598,45 @@ expression
        | NEW nonWildcardTypeArguments? innerCreator
        | SUPER superSuffix
        | explicitGenericInvocation
-      )
+      )                                                                                     #bopExpr
     // Method calls and method references are part of primary, and hence level 16 precedence
-    | methodCall
-    | expression '::' typeArguments? identifier
-    | typeType '::' (typeArguments? identifier | NEW)
-    | classType '::' typeArguments? NEW
+    | methodCall                                                                            #methCallExpr
+    | expression '::' typeArguments? identifier                                             #methRef1Expr
+    | typeType '::' (typeArguments? identifier | NEW)                                       #methRef2Expr
+    | classType '::' typeArguments? NEW                                                     #methRef3Expr
 
-    | switchExpression // Java17
+    | switchExpression /* Java17 */                                                         #swtchExpr
 
     // Level 15 Post-increment/decrement operators
-    | expression postfix=('++' | '--')
+    | expression postfix=('++' | '--')                                                      #incDecOpExpr
 
     // Level 14, Unary operators
-    | prefix=('+'|'-'|'++'|'--'|'~'|'!') expression
+    | prefix=('+'|'-'|'++'|'--'|'~'|'!') expression                                         #unaryOpExpr
 
     // Level 13 Cast and object creation
-    | '(' annotation* typeType ('&' typeType)* ')' expression
-    | NEW creator
+    | '(' annotation* typeType ('&' typeType)* ')' expression                               #castExpr
+    | NEW creator                                                                           #objCreateExpr
 
     // Level 12 to 1, Remaining operators
-    | expression bop=('*'|'/'|'%') expression  // Level 12, Multiplicative operators
-    | expression bop=('+'|'-') expression  // Level 11, Additive operators
-    | expression ('<' '<' | '>' '>' '>' | '>' '>') expression  // Level 10, Shift operators
-    | expression bop=('<=' | '>=' | '>' | '<') expression  // Level 9, Relational operators
-    | expression bop=INSTANCEOF (typeType | pattern)
-    | expression bop=('==' | '!=') expression  // Level 8, Equality Operators
-    | expression bop='&' expression  // Level 7, Bitwise AND
-    | expression bop='^' expression  // Level 6, Bitwise XOR
-    | expression bop='|' expression  // Level 5, Bitwise OR
-    | expression bop='&&' expression  // Level 4, Logic AND
-    | expression bop='||' expression  // Level 3, Logic OR
-    | <assoc=right> expression bop='?' expression ':' expression  // Level 2, Ternary
+    | expression bop=('*'|'/'|'%') expression  /* Level 12, Multiplicative operators */             #multOpExpr
+    | expression bop=('+'|'-') expression  /* Level 11, Additive operators */                       #addOpExpr
+    | expression ('<' '<' | '>' '>' '>' | '>' '>') expression  /* Level 10, Shift operators */      #shiftOpExpr
+    | expression bop=('<=' | '>=' | '>' | '<') expression  /* Level 9, Relational operators */      #relOpExpr
+    | expression bop=INSTANCEOF (typeType | pattern)                                                #instOfOpExpr
+    | expression bop=('==' | '!=') expression  /* Level 8, Equality Operators */                    #equaOpExpr
+    | expression bop='&' expression  /* Level 7, Bitwise AND */                                     #bitAndOpExpr
+    | expression bop='^' expression  /* Level 6, Bitwise XOR */                                     #bitXorOpExpr
+    | expression bop='|' expression  /* Level 5, Bitwise OR */                                      #bitOrExpr
+    | expression bop='&&' expression  /* Level 4, Logic AND */                                      #logAndExpr
+    | expression bop='||' expression  /* Level 3, Logic OR */                                       #logOrExpr
+    | <assoc=right> expression bop='?' expression ':' expression  /* Level 2, Ternary */            #ternExpr
     // Level 1, Assignment
     | <assoc=right> expression
       bop=('=' | '+=' | '-=' | '*=' | '/=' | '&=' | '|=' | '^=' | '>>=' | '>>>=' | '<<=' | '%=')
-      expression
+      expression                                                                                    #assignExpr
 
     // Level 0, Lambda Expression
-    | lambdaExpression // Java8
+    | lambdaExpression /* Java8 */                                                                  #lambdaExpr
     ;
 
 // Java17
@@ -651,26 +651,26 @@ lambdaExpression
 
 // Java8
 lambdaParameters
-    : identifier
-    | '(' formalParameterList? ')'
-    | '(' identifier (',' identifier)* ')'
-    | '(' lambdaLVTIList? ')'
+    : identifier                                                    #lambIdent
+    | '(' formalParameterList? ')'                                  #lambList
+    | '(' identifier (',' identifier)* ')'                          #lambIdent2
+    | '(' lambdaLVTIList? ')'                                       #lambLvti
     ;
 
 // Java8
 lambdaBody
-    : expression
-    | block
+    : expression                                                    #lambBodyExpr
+    | block                                                         #lambBodyBloc
     ;
 
 primary
-    : '(' expression ')'
-    | THIS
-    | SUPER
-    | literal
-    | identifier
-    | typeTypeOrVoid '.' CLASS
-    | nonWildcardTypeArguments (explicitGenericInvocationSuffix | THIS arguments)
+    : '(' expression ')'                                                                #primExpr
+    | THIS                                                                              #primThis
+    | SUPER                                                                             #primSuper
+    | literal                                                                           #primLit
+    | identifier                                                                        #primIdent
+    | typeTypeOrVoid '.' CLASS                                                          #primClass
+    | nonWildcardTypeArguments (explicitGenericInvocationSuffix | THIS arguments)       #primWild
     ;
 
 // Java17

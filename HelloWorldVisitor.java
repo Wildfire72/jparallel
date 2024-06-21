@@ -1,6 +1,5 @@
+import java.beans.JavaBean;
 import java.io.*;
-import java.util.ArrayList;
-
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
@@ -35,16 +34,300 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
     }
 
 //    @Override
-//    public Void visitPubmod(JavaParser.PubmodContext ctx) {
-//        out.print("public ");
+//    public Void visitCompUnitPack(JavaParser.CompUnitPackContext ctx) {
+//        if (ctx.packageDeclaration() != null) {
+//            visit(ctx.packageDeclaration());
+//        }
+//
 //        return null;
 //    }
 
     @Override
+    public Void visitCompUnitEOF(JavaParser.CompUnitEOFContext ctx) {
+        visit(ctx.moduleDeclaration());
+        out.print(ctx.EOF().getText());
+        return null;
+    }
+
+    @Override
+    public Void visitPackageDeclaration(JavaParser.PackageDeclarationContext ctx) {
+        for(JavaParser.AnnotationContext annot : ctx.annotation()) {
+            visit(annot);
+        }
+        out.print(ctx.PACKAGE().getText() + " ");
+        visit(ctx.qualifiedName());
+        out.print(";\n");
+        return null;
+    }
+
+    @Override
+    public Void visitImportDeclaration(JavaParser.ImportDeclarationContext ctx) {
+        out.print(ctx.IMPORT().getText() + " ");
+        if (ctx.STATIC() != null) {
+            out.print(ctx.STATIC().getText() + " ");
+        }
+        visit(ctx.qualifiedName());
+        if(ctx.DOT() != null) {
+            out.print(".*");
+        }
+        out.print(";\n");
+        return null;
+    }
+
+    @Override
+    public Void visitTypeDeclaration(JavaParser.TypeDeclarationContext ctx) {
+        for(JavaParser.ClassOrInterfaceModifierContext mod : ctx.classOrInterfaceModifier()) {
+            visit(mod);
+        }
+        if (ctx.classDeclaration() != null) {
+            visit(ctx.classDeclaration());
+        } else if (ctx.enumDeclaration() != null) {
+            visit(ctx.enumDeclaration());
+        } else if (ctx.interfaceDeclaration() != null) {
+            visit(ctx.interfaceDeclaration());
+        } else if (ctx.annotationTypeDeclaration() != null) {
+            visit(ctx.annotationTypeDeclaration());
+        } else {
+            visit(ctx.recordDeclaration());
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitClassOrIntMod(JavaParser.ClassOrIntModContext ctx) {
+        visit(ctx.classOrInterfaceModifier());
+        return null;
+    }
+
+    @Override
+    public Void visitNativeMod(JavaParser.NativeModContext ctx) {
+        out.print(ctx.NATIVE().getText() + " ");
+        return null;
+    }
+
+    @Override
+    public Void visitSyncMod(JavaParser.SyncModContext ctx) {
+        out.print(ctx.SYNCHRONIZED().getText() + " ");
+        return null;
+    }
+
+    @Override
+    public Void visitTransMod(JavaParser.TransModContext ctx) {
+        out.print(ctx.TRANSIENT().getText() + " ");
+        return null;
+    }
+
+    @Override
+    public Void visitVolaMod(JavaParser.VolaModContext ctx) {
+        out.print(ctx.VOLATILE().getText() + " ");
+        return null;
+    }
+
+    @Override
+    public Void visitAnnotate(JavaParser.AnnotateContext ctx) {
+        visit(ctx.annotation());
+        return null;
+    }
+
+    @Override
+    public Void visitPubMod(JavaParser.PubModContext ctx) {
+        out.print(ctx.PUBLIC().getText() + " ");
+        return null;
+    }
+
+    @Override
+    public Void visitProtMod(JavaParser.ProtModContext ctx) {
+        out.print(ctx.PROTECTED().getText() + " ");
+        return null;
+    }
+
+    @Override
+    public Void visitPrivMod(JavaParser.PrivModContext ctx) {
+        out.print(ctx.PRIVATE().getText() + " ");
+        return null;
+    }
+
+    @Override
+    public Void visitStatMod(JavaParser.StatModContext ctx) {
+        out.print(ctx.STATIC().getText() + " ");
+        return null;
+    }
+
+    @Override
+    public Void visitAbstrMod(JavaParser.AbstrModContext ctx) {
+        out.print(ctx.ABSTRACT().getText() + " ");
+        return null;
+    }
+
+    @Override
+    public Void visitFinMod(JavaParser.FinModContext ctx) {
+        out.print(ctx.FINAL().getText() + " ");
+        return null;
+    }
+
+    @Override
+    public Void visitStriMod(JavaParser.StriModContext ctx) {
+        out.print(ctx.STRICTFP().getText() + " ");
+        return null;
+    }
+
+    @Override
+    public Void visitSealMod(JavaParser.SealModContext ctx) {
+        out.print(ctx.SEALED().getText() + " ");
+        return null;
+    }
+
+    @Override
+    public Void visitNsealMod(JavaParser.NsealModContext ctx) {
+        out.print(ctx.NON_SEALED().getText() + " ");
+        return null;
+    }
+
+    @Override
+    public Void visitFinVarMod(JavaParser.FinVarModContext ctx) {
+        out.print(ctx.FINAL().getText() + " ");
+        return null;
+    }
+
+    @Override
+    public Void visitAnnotVarMod(JavaParser.AnnotVarModContext ctx) {
+        visit(ctx.annotation());
+        return null;
+    }
+
+    @Override
     public Void visitClassDeclaration(JavaParser.ClassDeclarationContext ctx) {
-        out.print("class " + ctx.identifier().getText() + "1 ");
+        out.print(ctx.CLASS().getText() + " " + ctx.identifier().getText() + "Out ");
+        if (ctx.typeParameters() != null) {
+            visit(ctx.typeParameters());
+        }
+        if (ctx.EXTENDS() != null) {
+            out.print(ctx.EXTENDS().getText() + " ");
+            visit(ctx.typeType());
+        }
+        if(ctx.IMPLEMENTS() != null) {
+            out.print(ctx.IMPLEMENTS().getText() + " ");
+            visit(ctx.typeList(0));
+        }
+        if (ctx.PERMITS() != null) {
+            out.print(ctx.PERMITS().getText() + " ");
+            visit(ctx.typeList(1));
+        }
         visit(ctx.classBody());
-        out.println();
+        return null;
+    }
+
+    @Override
+    public Void visitTypeParameters(JavaParser.TypeParametersContext ctx) {
+        out.print("<");
+        int i = 0;
+        visit(ctx.typeParameter(i));
+        i++;
+        while(ctx.typeParameter(i) != null) {
+            out.print(", ");
+            visit(ctx.typeParameter(i));
+        }
+        out.print(">");
+        return null;
+    }
+
+//    @Override
+//    public Void visitTypeParameter(JavaParser.TypeParameterContext ctx) {
+//
+//        return null;
+//    }
+
+    @Override
+    public Void visitTypeBound(JavaParser.TypeBoundContext ctx) {
+        int i = 0;
+        visit(ctx.typeType(i));
+        while (ctx.typeType(i) != null) {
+            out.print("&");
+            visit(ctx.typeType(i));
+            i++;
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitEnumDeclaration(JavaParser.EnumDeclarationContext ctx) {
+        out.print(ctx.ENUM().getText() + " ");
+        visit(ctx.identifier());
+        if (ctx.IMPLEMENTS() != null) {
+            out.print(ctx.IMPLEMENTS().getText() + " ");
+            visit(ctx.typeList());
+        }
+        out.print("{\n");
+        addTab();
+        printTabs();
+        if (ctx.enumConstants() !=null) {
+            visit(ctx.enumConstants());
+        }
+        if (ctx.COMMA() != null) {
+            out.print(ctx.COMMA().getText() + " ");
+        }
+        if (ctx.enumBodyDeclarations() != null) {
+            visit(ctx.enumBodyDeclarations());
+        }
+        remTab();
+        out.print("\n");
+        printTabs();
+        out.print("}\n");
+        return null;
+    }
+
+    @Override
+    public Void visitEnumConstants(JavaParser.EnumConstantsContext ctx) {
+        int i = 0;
+        visit(ctx.enumConstant(i));
+        i++;
+        while (ctx.enumConstant(i) != null) {
+            out.print(", ");
+            visit(ctx.enumConstant(i));
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitEnumConstant(JavaParser.EnumConstantContext ctx) {
+        for(JavaParser.AnnotationContext annot : ctx.annotation()) {
+            visit(annot);
+        }
+        visit(ctx.identifier());
+        if (ctx.arguments() != null) {
+            visit(ctx.arguments());
+        }
+        if(ctx.classBody() != null) {
+            visit(ctx.classBody());
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitEnumBodyDeclarations(JavaParser.EnumBodyDeclarationsContext ctx) {
+        out.print(";");
+        for (JavaParser.ClassBodyDeclarationContext body : ctx.classBodyDeclaration()) {
+            visit(body);
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitInterfaceDeclaration(JavaParser.InterfaceDeclarationContext ctx) {
+        out.print(ctx.INTERFACE().getText() + " ");
+        visit(ctx.identifier());
+        if(ctx.typeParameters() != null) {
+            visit(ctx.typeParameters());
+        }
+        if (ctx.EXTENDS() != null) {
+            out.print(ctx.EXTENDS().getText() + " ");
+            visit(ctx.typeList(0));
+        }
+        if (ctx.PERMITS() != null) {
+            out.print(ctx.PERMITS().getText() + " ");
+            visit(ctx.typeList(1));
+        }
+        visit(ctx.interfaceBody());
         return null;
     }
 
@@ -54,39 +337,107 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
         addTab();
         printTabs();
         visit(ctx.classBodyDeclaration(0));
-        out.println("\n}");
+        out.println("}\n");
         return null;
     }
 
     @Override
-    public Void visitClassBodyDeclaration(JavaParser.ClassBodyDeclarationContext ctx) {
-        visit(ctx.modifier(0));
-        visit(ctx.modifier(1));
+    public Void visitInterfaceBody(JavaParser.InterfaceBodyContext ctx) {
+        out.print("{\n");
+        addTab();
+        printTabs();
+        for (JavaParser.InterfaceBodyDeclarationContext body : ctx.interfaceBodyDeclaration()) {
+            visit(body);
+        }
+        remTab();
+        out.print("\n");
+        printTabs();
+        out.print("}\n");
+        return null;
+    }
+
+    @Override
+    public Void visitClassBodyDeclSemi(JavaParser.ClassBodyDeclSemiContext ctx) {
+        out.print(";\n");
+        printTabs();
+        return null;
+    }
+
+    @Override
+    public Void visitClassBodyDeclStatic(JavaParser.ClassBodyDeclStaticContext ctx) {
+        if(ctx.STATIC() != null) {
+            out.print(ctx.STATIC().getText() + " ");
+        }
+        visit(ctx.block());
+        return null;
+    }
+
+    @Override
+    public Void visitClassBodyDeclMod(JavaParser.ClassBodyDeclModContext ctx) {
+        for(JavaParser.ModifierContext mod : ctx.modifier()) {
+            visit(mod);
+        }
         visit(ctx.memberDeclaration());
         return null;
     }
 
     @Override
-    public Void visitModifier(JavaParser.ModifierContext ctx) {
-        visit(ctx.classOrInterfaceModifier());
+    public Void visitRecDecl(JavaParser.RecDeclContext ctx) {
+        visit(ctx.recordDeclaration());
         return null;
     }
 
     @Override
-    public Void visitClassOrInterfaceModifier(JavaParser.ClassOrInterfaceModifierContext ctx) {
-        if (ctx.PUBLIC() != null) {
-            out.print(ctx.getText() + " ");
-        } else if (ctx.STATIC() != null) {
-            out.print(ctx.getText() + " ");
-        }
+    public Void visitMethDecl(JavaParser.MethDeclContext ctx) {
+        visit(ctx.methodDeclaration());
         return null;
     }
 
     @Override
-    public Void visitMemberDeclaration(JavaParser.MemberDeclarationContext ctx) {
-        if (ctx.methodDeclaration() != null) {
-            visit(ctx.methodDeclaration());
-        }
+    public Void visitGenMethDecl(JavaParser.GenMethDeclContext ctx) {
+        visit(ctx.genericMethodDeclaration());
+        return null;
+    }
+
+    @Override
+    public Void visitFieldDecl(JavaParser.FieldDeclContext ctx) {
+        visit(ctx.fieldDeclaration());
+        return null;
+    }
+
+    @Override
+    public Void visitConsDecl(JavaParser.ConsDeclContext ctx) {
+        visit(ctx.constructorDeclaration());
+        return null;
+    }
+
+    @Override
+    public Void visitGenConsDecl(JavaParser.GenConsDeclContext ctx) {
+        visit(ctx.genericConstructorDeclaration());
+        return null;
+    }
+
+    @Override
+    public Void visitIntDecl(JavaParser.IntDeclContext ctx) {
+        visit(ctx.interfaceDeclaration());
+        return null;
+    }
+
+    @Override
+    public Void visitAnnotTypeDecl(JavaParser.AnnotTypeDeclContext ctx) {
+        visit(ctx.annotationTypeDeclaration());
+        return null;
+    }
+
+    @Override
+    public Void visitClassDecl(JavaParser.ClassDeclContext ctx) {
+        visit(ctx.classDeclaration());
+        return null;
+    }
+
+    @Override
+    public Void visitEnumDecl(JavaParser.EnumDeclContext ctx) {
+        visit(ctx.enumDeclaration());
         return null;
     }
 
@@ -102,7 +453,7 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
             }
         }
         if (ctx.qualifiedNameList() != null) {
-            out.print("throws");
+            out.print(ctx.THROWS().getText() + " ");
             visit(ctx.qualifiedNameList());
         }
         visit(ctx.methodBody());
@@ -110,30 +461,947 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitMethodBody(JavaParser.MethodBodyContext ctx) {
-        if (ctx.block() != null) {
-            visit(ctx.block());
-        } else {
-            out.print(";\n");
+    public Void visitMethBodyBlock(JavaParser.MethBodyBlockContext ctx) {
+        visit(ctx.block());
+        return null;
+    }
+
+    @Override
+    public Void visitMethBodySemi(JavaParser.MethBodySemiContext ctx) {
+        out.print(";\n");
+        return null;
+    }
+
+    @Override
+    public Void visitTyType(JavaParser.TyTypeContext ctx) {
+        visit(ctx.typeType());
+        return null;
+    }
+
+    @Override
+    public Void visitVoid(JavaParser.VoidContext ctx) {
+        out.print(ctx.VOID().getText() + " ");
+        return null;
+    }
+
+    @Override
+    public Void visitGenericMethodDeclaration(JavaParser.GenericMethodDeclarationContext ctx) {
+        visit(ctx.typeParameters());
+        visit(ctx.methodDeclaration());
+        return null;
+    }
+
+    @Override
+    public Void visitGenericConstructorDeclaration(JavaParser.GenericConstructorDeclarationContext ctx) {
+        visit(ctx.typeParameters());
+        visit(ctx.constructorDeclaration());
+        return null;
+    }
+
+    @Override
+    public Void visitConstructorDeclaration(JavaParser.ConstructorDeclarationContext ctx) {
+        visit(ctx.identifier());
+        visit(ctx.formalParameters());
+        if (ctx.qualifiedNameList() != null) {
+            out.print(ctx.THROWS().getText() + " ");
+            visit(ctx.qualifiedNameList());
+        }
+        visit(ctx.block());
+        return null;
+    }
+
+    @Override
+    public Void visitCompactConstructorDeclaration(JavaParser.CompactConstructorDeclarationContext ctx) {
+        for(JavaParser.ModifierContext mod : ctx.modifier()) {
+            visit(mod);
+        }
+        visit(ctx.identifier());
+        visit(ctx.block());
+        return  null;
+    }
+
+    @Override
+    public Void visitFieldDeclaration(JavaParser.FieldDeclarationContext ctx) {
+        visit(ctx.typeType());
+        visit(ctx.variableDeclarators());
+        out.print(";\n");
+        printTabs();
+        return null;
+    }
+
+    @Override
+    public Void visitIntBodyMod(JavaParser.IntBodyModContext ctx) {
+        for (JavaParser.ModifierContext mod : ctx.modifier()) {
+            visit(mod);
+        }
+        visit(ctx.interfaceMemberDeclaration());
+        return null;
+    }
+
+    @Override
+    public Void visitIntBodySemi(JavaParser.IntBodySemiContext ctx) {
+        out.print(";\n");
+        printTabs();
+        return null;
+    }
+
+    @Override
+    public Void visitIntRecDecl(JavaParser.IntRecDeclContext ctx) {
+        visit(ctx.recordDeclaration());
+        return null;
+    }
+
+    @Override
+    public Void visitIntConsDecl(JavaParser.IntConsDeclContext ctx) {
+        visit(ctx.constDeclaration());
+        return null;
+    }
+
+    @Override
+    public Void visitIntMethDecl(JavaParser.IntMethDeclContext ctx) {
+        visit(ctx.interfaceMethodDeclaration());
+        return null;
+    }
+
+    @Override
+    public Void visitGenIntMethDecl(JavaParser.GenIntMethDeclContext ctx) {
+        visit(ctx.genericInterfaceMethodDeclaration());
+        return null;
+    }
+
+    @Override
+    public Void visitIntIntDecl(JavaParser.IntIntDeclContext ctx) {
+        visit(ctx.interfaceDeclaration());
+        return null;
+    }
+
+    @Override
+    public Void visitAnnotDecl(JavaParser.AnnotDeclContext ctx) {
+        visit(ctx.annotationTypeDeclaration());
+        return null;
+    }
+
+    @Override
+    public Void visitIntClassDecl(JavaParser.IntClassDeclContext ctx) {
+        visit(ctx.classDeclaration());
+        return null;
+    }
+
+    @Override
+    public Void visitIntEnumDecl(JavaParser.IntEnumDeclContext ctx) {
+        visit(ctx.enumDeclaration());
+        return null;
+    }
+
+    @Override
+    public Void visitConstDeclaration(JavaParser.ConstDeclarationContext ctx) {
+        visit(ctx.typeType());
+        int i = 0;
+        visit(ctx.constantDeclarator(i));
+        i++;
+        while(ctx.constantDeclarator(i) != null) {
+            out.print(", ");
+            visit(ctx.constantDeclarator(i));
+            i++;
+        }
+        out.print(";\n");
+        printTabs();
+        return null;
+    }
+
+    @Override
+    public Void visitConstantDeclarator(JavaParser.ConstantDeclaratorContext ctx) {
+        visit(ctx.identifier());
+        for (int i = 0; i < ctx.LBRACK().size(); i++) {
+            out.print("[]");
+        }
+        out.print(" = ");
+        visit(ctx.variableInitializer());
+        return null;
+    }
+
+    @Override
+    public Void visitInterfaceMethodDeclaration(JavaParser.InterfaceMethodDeclarationContext ctx) {
+        for(JavaParser.InterfaceMethodModifierContext mod : ctx.interfaceMethodModifier()) {
+            visit(mod);
+        }
+        visit(ctx.interfaceCommonBodyDeclaration());
+        return null;
+    }
+
+    @Override
+    public Void visitIntAnnotMod(JavaParser.IntAnnotModContext ctx) {
+        visit(ctx.annotation());
+        return null;
+    }
+
+    @Override
+    public Void visitIntPubMod(JavaParser.IntPubModContext ctx) {
+        out.print(ctx.PUBLIC().getText() + " ");
+        return  null;
+    }
+
+    @Override
+    public Void visitIntAbsMod(JavaParser.IntAbsModContext ctx) {
+        out.print(ctx.ABSTRACT().getText() + " ");
+        return null;
+    }
+    @Override
+    public Void visitIntDefMod(JavaParser.IntDefModContext ctx) {
+        out.print(ctx.DEFAULT().getText() + " ");
+        return null;
+    }
+
+    @Override
+    public Void visitIntStatMod(JavaParser.IntStatModContext ctx) {
+        out.print(ctx.STATIC().getText() + " ");
+        return null;
+    }
+
+    @Override
+    public Void visitIntStriMod(JavaParser.IntStriModContext ctx) {
+        out.print(ctx.STRICTFP().getText() + " ");
+        return null;
+    }
+
+    @Override
+    public Void visitGenericInterfaceMethodDeclaration(JavaParser.GenericInterfaceMethodDeclarationContext ctx) {
+        for(JavaParser.InterfaceMethodModifierContext mod : ctx.interfaceMethodModifier()) {
+            visit(mod);
+        }
+        visit(ctx.typeParameters());
+        visit(ctx.interfaceCommonBodyDeclaration());
+        return null;
+    }
+
+    @Override
+    public Void visitInterfaceCommonBodyDeclaration(JavaParser.InterfaceCommonBodyDeclarationContext ctx) {
+        for(JavaParser.AnnotationContext annot : ctx.annotation()) {
+            visit(annot);
+        }
+        visit(ctx.typeTypeOrVoid());
+        visit(ctx.identifier());
+        visit(ctx.formalParameters());
+        for(int i = 0; i < ctx.LBRACK().size(); i++) {
+            out.print("[]");
+        }
+        if(ctx.qualifiedNameList() != null) {
+            out.print(ctx.THROWS().getText() + " ");
+            visit(ctx.qualifiedNameList());
+        }
+        visit(ctx.methodBody());
+        return null;
+    }
+
+    @Override
+    public Void visitVariableDeclarators(JavaParser.VariableDeclaratorsContext ctx) {
+        int i = 0;
+        visit(ctx.variableDeclarator(i));
+        i++;
+        while(ctx.variableDeclarator(i) != null) {
+            out.print(", ");
+            visit(ctx.variableDeclarator(i));
+            i++;
         }
         return null;
     }
 
     @Override
-    public Void visitBlock(JavaParser.BlockContext ctx) {
-        addTab();
+    public Void visitVariableDeclarator(JavaParser.VariableDeclaratorContext ctx) {
+        visit(ctx.variableDeclaratorId());
+        if(ctx.variableInitializer() != null) {
+            out.print(" = ");
+            visit(ctx.variableInitializer());
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitVariableDeclaratorId(JavaParser.VariableDeclaratorIdContext ctx) {
+        visit(ctx.identifier());
+        for (int i = 0; i < ctx.LBRACK().size(); i++) {
+            out.print(ctx.LBRACK(i).getText() + ctx.RBRACK(i).getText());
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitArrayInit(JavaParser.ArrayInitContext ctx) {
+        visit(ctx.arrayInitializer());
+        return null;
+    }
+
+    @Override
+    public Void visitVarExprInit(JavaParser.VarExprInitContext ctx) {
+        visit(ctx.expression());
+        return null;
+    }
+
+    @Override
+    public Void visitArrayInitializer(JavaParser.ArrayInitializerContext ctx) {
+        out.print("{");
+        int i = 0;
+        if(ctx.variableInitializer(i) != null) {
+            visit(ctx.variableInitializer(i));
+            i++;
+            while(ctx.variableInitializer(i) != null) {
+                out.print(", ");
+                visit(ctx.variableInitializer(i));
+                i++;
+            }
+            if (ctx.COMMA(0) != null) {
+                out.print(ctx.COMMA(0).getText());
+            }
+        }
+        out.print("}");
+        return null;
+    }
+
+    @Override
+    public Void visitClassOrInterfaceType(JavaParser.ClassOrInterfaceTypeContext ctx) {
+        int i = 0;
+        while (ctx.identifier(i) != null) {
+            visit(ctx.identifier(i));
+            out.print(" ");
+            if (ctx.typeArguments(i) != null) {
+                out.print(" ");
+                visit(ctx.typeArguments(i));
+            }
+            out.print(".");
+            i++;
+        }
+        visit(ctx.typeIdentifier());
+        if (ctx.typeArguments(i) != null) {
+            visit(ctx.typeArguments(i));
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitTyTyTypeArg(JavaParser.TyTyTypeArgContext ctx) {
+        visit(ctx.typeType());
+        return null;
+    }
+
+    @Override
+    public Void visitTyTyAnnot(JavaParser.TyTyAnnotContext ctx) {
+        for(JavaParser.AnnotationContext annot : ctx.annotation()) {
+            visit(annot);
+        }
+        out.print("?");
+        if (ctx.EXTENDS() != null) {
+            out.print(ctx.EXTENDS().getText() + " ");
+        } else {
+            out.print(ctx.SUPER().getText() + " ");
+        }
+        if (ctx.typeType() != null) {
+            visit(ctx.typeType());
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitQualifiedNameList(JavaParser.QualifiedNameListContext ctx) {
+        int i = 0;
+        visit(ctx.qualifiedName(i));
+        i++;
+        while(ctx.qualifiedName(i) != null) {
+            out.print(", ");
+            visit(ctx.qualifiedName(i));
+            i++;
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitFormalParameters(JavaParser.FormalParametersContext ctx) {
+        out.print("(");
+        if (ctx.receiverParameter() != null) {
+            visit(ctx.receiverParameter());
+            if (ctx.formalParameterList() != null) {
+                out.print(", ");
+                visit(ctx.formalParameterList());
+            }
+        } else if(ctx.formalParameterList() != null) {
+            visit(ctx.formalParameterList());
+        }
+        out.print(") ");
+        return null;
+    }
+
+    @Override
+    public Void visitReceiverParameter(JavaParser.ReceiverParameterContext ctx) {
+        visit(ctx.typeType());
+        int i = 0;
+        while (ctx.identifier(i) != null) {
+            visit(ctx.identifier(i));
+            out.print(".");
+            i++;
+        }
+        out.print(ctx.THIS().getText() + " ");
+        return null;
+    }
+
+    @Override
+    public Void visitFormalParameterList(JavaParser.FormalParameterListContext ctx) {
+        if (ctx.formalParameter(0) != null) {
+            int i = 0;
+            visit(ctx.formalParameter(i));
+            i++;
+            while (ctx.formalParameter(i) != null) {
+                out.print(", ");
+                visit(ctx.formalParameter(i));
+                i++;
+            }
+            if (ctx.lastFormalParameter() != null) {
+                out.print(", ");
+                visit(ctx.lastFormalParameter());
+            }
+        } else {
+            visit(ctx.lastFormalParameter());
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitFormalParameter(JavaParser.FormalParameterContext ctx) {
+        if (ctx.variableModifier(0) != null) {
+            for (JavaParser.VariableModifierContext modifier: ctx.variableModifier()) {
+                visit(modifier);
+            }
+        }
+        visit(ctx.typeType());
+        visit(ctx.variableDeclaratorId());
+        return null;
+    }
+
+    @Override
+    public Void visitLastFormalParameter(JavaParser.LastFormalParameterContext ctx) {
+        if (ctx.variableModifier(0) != null) {
+            for (JavaParser.VariableModifierContext modifier: ctx.variableModifier()) {
+                visit(modifier);
+            }
+        }
+        visit(ctx.typeType());
+        if (ctx.annotation(0) != null) {
+            for (JavaParser.AnnotationContext annotation: ctx.annotation()) {
+                visit(annotation);
+            }
+        }
+        out.print("...");
+        visit(ctx.variableDeclaratorId());
+        return null;
+    }
+
+    @Override
+    public Void visitLambdaLVTIList(JavaParser.LambdaLVTIListContext ctx) {
+        int i = 0;
+        visit(ctx.lambdaLVTIParameter(i));
+        i++;
+        while(ctx.lambdaLVTIParameter(i) != null) {
+            out.print(", ");
+            visit(ctx.lambdaLVTIParameter(i));
+            i++;
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitLambdaLVTIParameter(JavaParser.LambdaLVTIParameterContext ctx) {
+        for(JavaParser.VariableModifierContext mod : ctx.variableModifier()) {
+            visit(mod);
+        }
+        out.print(ctx.VAR().getText() + " ");
+        visit(ctx.identifier());
+        return null;
+    }
+
+    @Override
+    public Void visitQualifiedName(JavaParser.QualifiedNameContext ctx) {
+        int i = 0;
+        visit(ctx.identifier(i));
+        i++;
+        while (ctx.identifier(i) != null) {
+            out.print(".");
+            visit(ctx.identifier(i));
+            i++;
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitIntLit(JavaParser.IntLitContext ctx) {
+        visit(ctx.integerLiteral());
+        return null;
+    }
+
+    @Override
+    public Void visitFloatLit(JavaParser.FloatLitContext ctx) {
+        visit(ctx.floatLiteral());
+        return null;
+    }
+
+    @Override
+    public Void visitCharLit(JavaParser.CharLitContext ctx) {
+        out.print(ctx.CHAR_LITERAL().getText());
+        return null;
+    }
+
+    @Override
+    public Void visitStringLit(JavaParser.StringLitContext ctx) {
+        out.print(ctx.STRING_LITERAL().getText());
+        return null;
+    }
+
+    @Override
+    public Void visitBoolLit(JavaParser.BoolLitContext ctx) {
+        out.print(ctx.BOOL_LITERAL().getText());
+        return null;
+    }
+
+    @Override
+    public Void visitNullLit(JavaParser.NullLitContext ctx) {
+        out.print(ctx.NULL_LITERAL().getText());
+        return null;
+    }
+
+    @Override
+    public Void visitTxtBlocLit(JavaParser.TxtBlocLitContext ctx) {
+        out.print(ctx.TEXT_BLOCK().getText());
+        return null;
+    }
+
+    @Override
+    public Void visitDecLit(JavaParser.DecLitContext ctx) {
+        out.print(ctx.DECIMAL_LITERAL().getText());
+        return null;
+    }
+
+    @Override
+    public Void visitHexLit(JavaParser.HexLitContext ctx) {
+        out.print(ctx.HEX_LITERAL().getText());
+        return  null;
+    }
+
+    @Override
+    public Void visitOctLit(JavaParser.OctLitContext ctx) {
+        out.print(ctx.OCT_LITERAL().getText());
+        return  null;
+    }
+
+    @Override
+    public Void visitBinLit(JavaParser.BinLitContext ctx) {
+        out.print(ctx.BINARY_LITERAL().getText());
+        return null;
+    }
+
+    @Override
+    public Void visitActFloatLit(JavaParser.ActFloatLitContext ctx) {
+        out.print(ctx.FLOAT_LITERAL().getText());
+        return  null;
+    }
+
+    @Override
+    public Void visitHexFloatLit(JavaParser.HexFloatLitContext ctx) {
+        out.print(ctx.HEX_FLOAT_LITERAL().getText());
+        return null;
+    }
+
+    @Override
+    public Void visitAltAnnotationQualifiedName(JavaParser.AltAnnotationQualifiedNameContext ctx) {
+        int i = 0;
+        while(ctx.DOT(i) != null) {
+            visit(ctx.identifier(0));
+            out.print(ctx.DOT(i).getText());
+            i++;
+        }
+        out.print("@");
+        visit(ctx.identifier(i));
+        return null;
+    }
+
+    @Override
+    public Void visitAnnotation(JavaParser.AnnotationContext ctx) {
+        if (ctx.qualifiedName() != null) {
+            out.print("@");
+            visit(ctx.qualifiedName());
+        } else if(ctx.altAnnotationQualifiedName() != null) {
+            out.print("@");
+            visit(ctx.altAnnotationQualifiedName());
+        }
+        if(ctx.LPAREN() != null) {
+            out.print(ctx.LPAREN().getText());
+            if (ctx.elementValuePairs() != null) {
+                visit(ctx.elementValuePairs());
+            } else if (ctx.elementValue() != null){
+                visit(ctx.elementValue());
+            }
+            out.print(ctx.RPAREN().getText());
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitElementValuePairs(JavaParser.ElementValuePairsContext ctx) {
+        int i = 0;
+        visit(ctx.elementValuePair(i));
+        i++;
+        while(ctx.elementValuePair(i) != null) {
+            out.print(", ");
+            visit(ctx.elementValuePair(i));
+            i++;
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitElementValuePair(JavaParser.ElementValuePairContext ctx) {
+        visit(ctx.identifier());
+        out.print(" = ");
+        visit(ctx.elementValue());
+        return null;
+    }
+
+    @Override
+    public Void visitExprElVal(JavaParser.ExprElValContext ctx) {
+        visit(ctx.expression());
+        return null;
+    }
+
+    @Override
+    public Void visitAnnotElVal(JavaParser.AnnotElValContext ctx) {
+        visit(ctx.annotation());
+        return null;
+    }
+
+    @Override
+    public Void visitArrayElVal(JavaParser.ArrayElValContext ctx) {
+        visit(ctx.elementValueArrayInitializer());
+        return null;
+    }
+
+    @Override
+    public Void visitElementValueArrayInitializer(JavaParser.ElementValueArrayInitializerContext ctx) {
+        out.print("{");
+        int i = 0;
+        if (ctx.elementValue(i) != null) {
+            visit(ctx.elementValue(i));
+            i++;
+        }
+        while(ctx.elementValue(i) != null) {
+            out.print(", ");
+            visit(ctx.elementValue(i));
+            i++;
+        }
+        if(ctx.COMMA(i-1) != null) {
+            out.print(ctx.COMMA(i-1).getText());
+        }
+        out.print("}");
+        return null;
+    }
+
+    @Override
+    public Void visitAnnotationTypeDeclaration(JavaParser.AnnotationTypeDeclarationContext ctx) {
+        out.print("@");
+        out.print(ctx.INTERFACE().getText());
+        visit(ctx.identifier());
+        visit(ctx.annotationTypeBody());
+        return null;
+    }
+
+    @Override
+    public Void visitAnnotationTypeBody(JavaParser.AnnotationTypeBodyContext ctx) {
         out.print("{\n");
+        addTab();
         printTabs();
+        for(JavaParser.AnnotationTypeElementDeclarationContext element : ctx.annotationTypeElementDeclaration()) {
+            visit(element);
+        }
+        remTab();
+        printTabs();
+        out.print("}\n");
+        return null;
+    }
+
+    @Override
+    public Void visitAnnotationTypeElementDeclaration(JavaParser.AnnotationTypeElementDeclarationContext ctx) {
+        if(ctx.annotationTypeElementRest() != null) {
+            for (JavaParser.ModifierContext mod : ctx.modifier()) {
+                visit(mod);
+            }
+            visit(ctx.annotationTypeElementRest());
+        } else {
+            out.print(";\n");
+            printTabs();
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitAnnotTyTy(JavaParser.AnnotTyTyContext ctx) {
+        visit(ctx.typeType());
+        visit(ctx.annotationMethodOrConstantRest());
+        out.print(";\n");
+        printTabs();
+        return null;
+    }
+
+    @Override
+    public Void visitAnnotClass(JavaParser.AnnotClassContext ctx) {
+        visit(ctx.classDeclaration());
+        if(ctx.SEMI() != null) {
+            out.print(ctx.SEMI().getText() + "\n");
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitAnnotInt(JavaParser.AnnotIntContext ctx) {
+        visit(ctx.interfaceDeclaration());
+        if(ctx.SEMI() != null) {
+            out.print(ctx.SEMI().getText() + "\n");
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitAnnotEnum(JavaParser.AnnotEnumContext ctx) {
+        visit(ctx.enumDeclaration());
+        if(ctx.SEMI() != null) {
+            out.print(ctx.SEMI().getText() + "\n");
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitAnnotType(JavaParser.AnnotTypeContext ctx) {
+        visit(ctx.annotationTypeDeclaration());
+        if(ctx.SEMI() != null) {
+            out.print(ctx.SEMI().getText() + "\n");
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitAnnotRec(JavaParser.AnnotRecContext ctx) {
+        visit(ctx.recordDeclaration());
+        if(ctx.SEMI() != null) {
+            out.print(ctx.SEMI().getText() + "\n");
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitAnnotMeth(JavaParser.AnnotMethContext ctx) {
+        visit(ctx.annotationMethodRest());
+        return null;
+    }
+
+    @Override
+    public Void visitAnnotConst(JavaParser.AnnotConstContext ctx) {
+        visit(ctx.annotationConstantRest());
+        return null;
+    }
+
+    @Override
+    public Void visitAnnotationMethodRest(JavaParser.AnnotationMethodRestContext ctx) {
+        visit(ctx.identifier());
+        out.print("()");
+        if (ctx.defaultValue() != null) {
+            visit(ctx.defaultValue());
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitAnnotationConstantRest(JavaParser.AnnotationConstantRestContext ctx) {
+        visit(ctx.variableDeclarators());
+        return null;
+    }
+
+    @Override
+    public Void visitDefaultValue(JavaParser.DefaultValueContext ctx) {
+        out.print(ctx.DEFAULT().getText());
+        visit(ctx.elementValue());
+        return null;
+    }
+
+    @Override
+    public Void visitModuleDeclaration(JavaParser.ModuleDeclarationContext ctx) {
+        if(ctx.OPEN() != null) {
+            out.print(ctx.OPEN().getText());
+        }
+        out.print(ctx.MODULE().getText());
+        visit(ctx.qualifiedName());
+        visit(ctx.moduleBody());
+        return null;
+    }
+
+    @Override
+    public Void visitModuleBody(JavaParser.ModuleBodyContext ctx) {
+        out.print("{\n");
+        addTab();
+        printTabs();
+        for(JavaParser.ModuleDirectiveContext dir : ctx.moduleDirective()) {
+            visit(dir);
+        }
+        remTab();
+        printTabs();
+        out.print("}\n");
+        return null;
+    }
+
+    @Override
+    public Void visitModReq(JavaParser.ModReqContext ctx) {
+        out.print(ctx.REQUIRES().getText() + " ");
+        for(JavaParser.RequiresModifierContext req : ctx.requiresModifier()) {
+            visit(req);
+        }
+        visit(ctx.qualifiedName());
+        out.print(";\n");
+        printTabs();
+        return null;
+    }
+
+    @Override
+    public Void visitModExp(JavaParser.ModExpContext ctx) {
+        out.print(ctx.EXPORTS().getText() + " ");
+        visit(ctx.qualifiedName(0));
+        if(ctx.qualifiedName(1) != null) {
+            out.print(ctx.TO().getText());
+            visit(ctx.qualifiedName(1));
+        }
+        out.print(";\n");
+        printTabs();
+        return null;
+    }
+
+    @Override
+    public Void visitModOpen(JavaParser.ModOpenContext ctx) {
+        out.print(ctx.OPENS().getText() + " ");
+        visit(ctx.qualifiedName(0));
+        if(ctx.qualifiedName(1) != null) {
+            out.print(ctx.TO().getText());
+            visit(ctx.qualifiedName(1));
+        }
+        out.print(";\n");
+        printTabs();
+        return null;
+    }
+
+    @Override
+    public Void visitModUses(JavaParser.ModUsesContext ctx) {
+        out.print(ctx.USES().getText() + " ");
+        visit(ctx.qualifiedName());
+        out.print(";\n");
+        printTabs();
+        return null;
+    }
+
+    @Override
+    public Void visitModProv(JavaParser.ModProvContext ctx) {
+        out.print(ctx.PROVIDES().getText() + " ");
+        visit(ctx.qualifiedName(0));
+        out.print(ctx.WITH().getText() + " ");
+        visit(ctx.qualifiedName(1));
+        out.print(";\n");
+        printTabs();
+        return null;
+    }
+
+    @Override
+    public Void visitReqTrans(JavaParser.ReqTransContext ctx) {
+        out.print(ctx.TRANSITIVE().getText() + " ");
+        return null;
+    }
+
+    @Override
+    public Void visitReqStat(JavaParser.ReqStatContext ctx) {
+        out.print(ctx.STATIC().getText() + " ");
+        return null;
+    }
+
+    @Override
+    public Void visitRecordDeclaration(JavaParser.RecordDeclarationContext ctx) {
+        out.print(ctx.RECORD().getText() + " ");
+        visit(ctx.identifier());
+        if (ctx.typeParameters() != null) {
+            visit(ctx.typeParameters());
+        }
+        visit(ctx.recordHeader());
+        if (ctx.typeList() != null) {
+            out.print(ctx.IMPLEMENTS().getText() + " ");
+            visit(ctx.typeList());
+            visit(ctx.recordBody());
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitRecordHeader(JavaParser.RecordHeaderContext ctx) {
+        out.print("(");
+        if (ctx.recordComponentList() != null) {
+            visit(ctx.recordComponentList());
+        }
+        out.print(")");
+        return null;
+    }
+
+    @Override
+    public Void visitRecordComponentList(JavaParser.RecordComponentListContext ctx) {
+        int i = 0;
+        visit(ctx.recordComponent(i));
+        i++;
+        while(ctx.recordComponent(i) != null) {
+            out.print(", ");
+            visit(ctx.recordComponent(i));
+            i++;
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitRecordComponent(JavaParser.RecordComponentContext ctx) {
+        visit(ctx.typeType());
+        visit(ctx.identifier());
+        return null;
+    }
+
+    @Override
+    public Void visitRecordBody(JavaParser.RecordBodyContext ctx) {
+        out.print("{\n");
+        addTab();
+        printTabs();
+        int i = 0;
+        while(ctx.classBodyDeclaration(i) != null || ctx.compactConstructorDeclaration(i) != null) {
+            if (ctx.classBodyDeclaration(i) != null) {
+                visit(ctx.classBodyDeclaration(i));
+                i++;
+            } else if (ctx.compactConstructorDeclaration(i) != null) {
+                visit(ctx.compactConstructorDeclaration(i));
+                i++;
+            }
+        }
+        remTab();
+        printTabs();
+        out.print("}\n");
+        return null;
+    }
+
+    @Override
+    public Void visitBlock(JavaParser.BlockContext ctx) {
+        out.print("{\n");
+        addTab();
         if (ctx.blockStatement(0) != null) {
             for (JavaParser.BlockStatementContext stmt: ctx.blockStatement()) {
+                printTabs();
                 visit(stmt);
             }
         }
         remTab();
-        out.print("\n");
         printTabs();
-        out.print("}");
-        remTab();
+        out.print("}\n\n");
+        printTabs();
         return null;
     }
 
@@ -142,7 +1410,6 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
         if (ctx.localVariableDeclaration() != null) {
             visit(ctx.localVariableDeclaration());
             out.print(";\n");
-            printTabs();
         } else if (ctx.localTypeDeclaration() != null) {
             visit(ctx.localTypeDeclaration());
         } else {
@@ -159,14 +1426,30 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
             }
         }
         if (ctx.identifier() != null && ctx.expression() != null) {
-            out.print("var ");
+            out.print(ctx.VAR().getText() + " ");
             visit(ctx.identifier());
             out.print(" = ");
-            out.print(ctx.expression());
+            visit(ctx.expression());
         } else {
             visit(ctx.typeType());
             visit(ctx.variableDeclarators());
         }
+        return null;
+    }
+
+    @Override
+    public Void visitIdentifier(JavaParser.IdentifierContext ctx) {
+        if(ctx.getText().contains(".")) {
+            out.print(ctx.getText());
+        } else {
+            out.print(ctx.getText() + " ");
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitTypeIdentifier(JavaParser.TypeIdentifierContext ctx) {
+        out.print(ctx.getText() + " ");
         return null;
     }
 
@@ -184,189 +1467,367 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitVariableDeclarators(JavaParser.VariableDeclaratorsContext ctx) {
-        int i = 0;
-        visit(ctx.variableDeclarator(i));
-        i++;
-        while(ctx.variableDeclarator(i) != null) {
-            out.print(", ");
-            visit(ctx.variableDeclarator(i));
+    public Void visitBlockStmt(JavaParser.BlockStmtContext ctx) {
+        visit(ctx.block());
+        return null;
+    }
+
+    @Override
+    public Void visitAssertStmt(JavaParser.AssertStmtContext ctx) {
+        out.print(ctx.ASSERT().getText());
+        visit(ctx.expression(0));
+        if (ctx.expression(1) != null) {
+            out.print(":");
+            visit(ctx.expression(1));
+        }
+        out.print(";\n");
+        return null;
+    }
+
+    @Override
+    public Void visitIfStmt(JavaParser.IfStmtContext ctx) {
+        out.print(ctx.IF().getText());
+        visit(ctx.parExpression());
+        visit(ctx.statement(0));
+        if (ctx.statement(1) != null) {
+            out.print(ctx.ELSE().getText() + " ");
+            visit(ctx.statement(1));
         }
         return null;
     }
 
     @Override
-    public Void visitVariableDeclarator(JavaParser.VariableDeclaratorContext ctx) {
-        visit(ctx.variableDeclaratorId());
-        if(ctx.variableInitializer() != null) {
-            out.print(" = ");
-            visit(ctx.variableInitializer());
-        }
+    public Void visitForStmt(JavaParser.ForStmtContext ctx) {
+        out.print("for(");
+        visit(ctx.forControl());
+        out.print(") ");
+        visit(ctx.statement());
         return null;
     }
 
     @Override
-    public Void visitStatement(JavaParser.StatementContext ctx) {
-        if(ctx.blockLabel != null) {
-            visit(ctx.block());
-        } else if(ctx.ASSERT() != null) {
-            out.print(ctx.ASSERT().getText());
-            visit(ctx.expression(0));
-            if (ctx.expression(1) != null) {
-                out.print(":");
-                visit(ctx.expression(1));
-            }
-            out.print(";");
-        } else if(ctx.IF() != null) {
-            out.print("if ");
-            visit((ctx.parExpression()));
-            visit(ctx.statement(0));
-            if (ctx.ELSE() != null) {
-                out.print("else ");
-                visit(ctx.statement(1));
-            }
-        } else if(ctx.FOR() != null) {
-            out.print("for (");
-            visit(ctx.forControl());
-            out.print(") ");
-            visit(ctx.statement(0));
-        } else if (ctx.DO() == null && ctx.WHILE() != null) {
-            out.print("while ");
-            visit(ctx.parExpression());
-            visit(ctx.statement(0));
-        } else if (ctx.DO() != null) {
-            out.print("do");
-            visit(ctx.statement(0));
-            out.print("while");
-            visit(ctx.parExpression());
-            out.print(";");
-        } else if (ctx.TRY() != null && ctx.resourceSpecification() == null) {
-            out.print("try ");
-            visit(ctx.block());
-            if (ctx.catchClause(0) != null) {
-                for (JavaParser.CatchClauseContext clause : ctx.catchClause()) {
-                    visit(clause);
-                }
-                if (ctx.finallyBlock() != null) {
-                    visit(ctx.finallyBlock());
-                }
-            } else {
-                visit(ctx.finallyBlock());
-            }
-        } else if (ctx.TRY() != null) {
-            out.print("try ");
-            visit(ctx.resourceSpecification());
-            visit(ctx.block());
-            if (ctx.catchClause(0) != null) {
-                for (JavaParser.CatchClauseContext clause : ctx.catchClause()) {
-                    visit(clause);
-                }
+    public Void visitWhileStmt(JavaParser.WhileStmtContext ctx) {
+        out.print(ctx.WHILE().getText());
+        visit(ctx.parExpression());
+        visit(ctx.statement());
+        return null;
+    }
+
+    @Override
+    public Void visitDoStmt(JavaParser.DoStmtContext ctx) {
+        out.print(ctx.DO().getText());
+        visit(ctx.statement());
+        out.print(ctx.WHILE().getText());
+        visit(ctx.parExpression());
+        out.print(";\n");
+        return null;
+    }
+
+    @Override
+    public Void visitTryBlockStmt(JavaParser.TryBlockStmtContext ctx) {
+        out.print(ctx.TRY().getText());
+        visit(ctx.block());
+        if (ctx.catchClause(0) != null) {
+            for (JavaParser.CatchClauseContext clause : ctx.catchClause()) {
+                visit(clause);
             }
             if (ctx.finallyBlock() != null) {
                 visit(ctx.finallyBlock());
             }
-        } else if (ctx.SWITCH() != null) {
-            out.print("switch ");
-            visit(ctx.parExpression());
-            out.print("{");
-            addTab();
-            printTabs();
-            if (ctx.switchBlockStatementGroup(0) != null) {
-                for (JavaParser.SwitchBlockStatementGroupContext group : ctx.switchBlockStatementGroup()) {
-                    visit(group);
-                }
-            }
-            if (ctx.switchLabel(0) != null) {
-                for (JavaParser.SwitchLabelContext label : ctx.switchLabel()) {
-                    visit(label);
-                }
-            }
-            remTab();
-            printTabs();
-            out.print("}");
-        } else if (ctx.SYNCHRONIZED() != null) {
-            out.print("synchronized ");
-            visit(ctx.parExpression());
-            visit(ctx.block());
-        } else if (ctx.RETURN() != null) {
-            out.print("return ");
-            if (ctx.expression() != null) {
-                visit(ctx.expression(0));
-                out.print(";");
-            }
-        } else if (ctx.THROW() != null) {
-            out.print("throw ");
-            visit(ctx.expression(0));
-            out.print(";");
-        } else if (ctx.BREAK() != null) {
-            out.print("break ");
-            if (ctx.identifier() != null) {
-                visit(ctx.identifier());
-                out.print(";");
-            }
-        } else if (ctx.CONTINUE() != null) {
-            out.print("continue ");
-            if (ctx.identifier() != null) {
-                visit(ctx.identifier());
-                out.print(";");
-            }
-        } else if (ctx.YIELD() != null) {
-            out.print("yield ");
-            visit(ctx.expression(0));
-            out.print(";");
-        } else if (ctx.statementExpression != null) {
-            visit(ctx.expression(0));
-            out.print(";");
-        } else if (ctx.switchExpression() != null) {
-            visit(ctx.switchExpression());
-            if (ctx.getText().contains(";")) {
-                out.print(";");
-            }
-        } else if (ctx.identifierLabel != null) {
+        } else {
+            visit(ctx.finallyBlock());
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitTryStmt(JavaParser.TryStmtContext ctx) {
+        out.print(ctx.TRY().getText());
+        visit(ctx.resourceSpecification());
+        visit(ctx.block());
+        for (JavaParser.CatchClauseContext clause : ctx.catchClause()) {
+            visit(clause);
+        }
+        if (ctx.finallyBlock() != null) {
+            visit(ctx.finallyBlock());
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitSwitchStmt(JavaParser.SwitchStmtContext ctx) {
+        out.print(ctx.SWITCH().getText());
+        visit(ctx.parExpression());
+        out.print("{\n");
+        addTab();
+        printTabs();
+        for(JavaParser.SwitchBlockStatementGroupContext group : ctx.switchBlockStatementGroup()) {
+            visit(group);
+        }
+        for(JavaParser.SwitchLabelContext label : ctx.switchLabel()) {
+            visit(label);
+        }
+        remTab();
+        printTabs();
+        out.print("}\n");
+        return null;
+    }
+
+    @Override
+    public Void visitSyncStmt(JavaParser.SyncStmtContext ctx) {
+        out.print(ctx.SYNCHRONIZED().getText());
+        visit(ctx.parExpression());
+        visit(ctx.block());
+        return null;
+    }
+
+    @Override
+    public Void visitReturnStmt(JavaParser.ReturnStmtContext ctx) {
+        out.print(ctx.RETURN().getText());
+        if(ctx.expression() != null) {
+            visit(ctx.expression());
+        }
+        out.print(";\n");
+        return null;
+    }
+
+    @Override
+    public Void visitThrowStmt(JavaParser.ThrowStmtContext ctx) {
+        out.print(ctx.THROW().getText());
+        visit(ctx.expression());
+        out.print(";\n");
+        return null;
+    }
+
+    @Override
+    public Void visitBreakStmt(JavaParser.BreakStmtContext ctx) {
+        out.print(ctx.BREAK().getText());
+        if(ctx.identifier() != null) {
             visit(ctx.identifier());
-            out.print(":");
-            visit(ctx.statement(0));
-        } else if (ctx.SEMI() != null) {
+        }
+        out.print(";\n");
+        return null;
+    }
+
+    @Override
+    public Void visitContStmt(JavaParser.ContStmtContext ctx) {
+        out.print(ctx.CONTINUE().getText());
+        if(ctx.identifier() != null) {
+            visit(ctx.identifier());
+        }
+        out.print(";\n");
+        return null;
+    }
+
+    @Override
+    public Void visitYieldStmt(JavaParser.YieldStmtContext ctx) {
+        out.print(ctx.YIELD().getText());
+        visit(ctx.expression());
+        out.print(";\n");
+        return null;
+    }
+
+    @Override
+    public Void visitSemiStmt(JavaParser.SemiStmtContext ctx) {
+        out.print(ctx.SEMI().getText()+"\n");
+        return null;
+    }
+
+    @Override
+    public Void visitExprStmt(JavaParser.ExprStmtContext ctx) {
+        visit(ctx.expression());
+        out.print(";\n");
+        return null;
+    }
+
+    @Override
+    public Void visitSwtchExprStmt(JavaParser.SwtchExprStmtContext ctx) {
+        visit(ctx.switchExpression());
+        if(ctx.SEMI() != null) {
             out.print(ctx.SEMI().getText());
         }
         return null;
     }
 
-//    @Override
-//    public Void visitForControl(JavaParser.ForControlContext ctx) {
-//
-//        return null;
-//    }
+    @Override
+    public Void visitIdentStmt(JavaParser.IdentStmtContext ctx) {
+        visit(ctx.identifier());
+        out.print(":");
+        visit(ctx.statement());
+        return null;
+    }
 
-//    @Override
-//    public Void visitResourceSpecification(JavaParser.ResourceSpecificationContext ctx) {
-//
-//        return null;
-//    }
+    @Override
+    public Void visitCatchClause(JavaParser.CatchClauseContext ctx) {
+        out.print(ctx.CATCH().getText());
+        out.print("(");
+        for (JavaParser.VariableModifierContext mod : ctx.variableModifier()) {
+            visit(mod);
+        }
+        visit(ctx.catchType());
+        visit(ctx.identifier());
+        out.print(")");
+        visit(ctx.block());
+        return null;
+    }
 
-//    @Override
-//    public Void visitCatchClause(JavaParser.CatchClauseContext ctx) {
-//
-//        return null;
-//    }
+    @Override
+    public Void visitCatchType(JavaParser.CatchTypeContext ctx) {
+        int i = 0;
+        visit(ctx.qualifiedName(i));
+        i++;
+        while(ctx.qualifiedName(i) != null) {
+            out.print("|");
+            visit(ctx.qualifiedName(i));
+            i++;
+        }
+        return null;
+    }
 
-//    @Override
-//    public Void visitFinallyBlock(JavaParser.FinallyBlockContext ctx) {
-//
-//        return null;
-//    }
+    @Override
+    public Void visitFinallyBlock(JavaParser.FinallyBlockContext ctx) {
+        out.print(ctx.FINALLY().getText());
+        visit(ctx.block());
+        return null;
+    }
 
-//    @Override
-//    public Void visitSwitchLabel(JavaParser.SwitchLabelContext ctx) {
-//
-//        return null;
-//    }
+    @Override
+    public Void visitResourceSpecification(JavaParser.ResourceSpecificationContext ctx) {
+        out.print("(");
+        visit(ctx.resources());
+        if (ctx.SEMI() != null) {
+            out.print(ctx.SEMI().getText());
+        }
+        out.print(")");
+        return null;
+    }
 
-//    @Override
-//    public Void visitSwitchBlockStatementGroup(JavaParser.SwitchBlockStatementGroupContext ctx) {
-//
-//        return null;
-//    }
+    @Override
+    public Void visitResources(JavaParser.ResourcesContext ctx) {
+        int i = 0;
+        visit(ctx.resource(i));
+        i++;
+        while(ctx.resource(i) != null) {
+            out.print(";");
+            visit(ctx.resource(i));
+            i++;
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitVarRes(JavaParser.VarResContext ctx) {
+        for(JavaParser.VariableModifierContext mod : ctx.variableModifier()) {
+            visit(mod);
+        }
+        if (ctx.VAR() == null) {
+            visit(ctx.classOrInterfaceType());
+            visit(ctx.variableDeclaratorId());
+        } else {
+            out.print(ctx.VAR().getText() + " ");
+            visit(ctx.identifier());
+        }
+        out.print(" = ");
+        visit(ctx.expression());
+        return null;
+    }
+
+    @Override
+    public Void visitQualRes(JavaParser.QualResContext ctx) {
+        visit(ctx.qualifiedName());
+        return null;
+    }
+
+    @Override
+    public Void visitSwitchBlockStatementGroup(JavaParser.SwitchBlockStatementGroupContext ctx) {
+        for (JavaParser.SwitchLabelContext label : ctx.switchLabel()) {
+            visit(label);
+        }
+        for (JavaParser.BlockStatementContext block : ctx.blockStatement()) {
+            visit(block);
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitCaseSwLbl(JavaParser.CaseSwLblContext ctx) {
+        out.print(ctx.CASE().getText());
+        if(ctx.expression() != null) {
+            visit(ctx.expression());
+        } else if (ctx.IDENTIFIER() != null) {
+            out.print(ctx.IDENTIFIER().getText());
+        } else {
+            visit(ctx.typeType());
+            visit(ctx.identifier());
+        }
+        out.print(":");
+        return null;
+    }
+
+    @Override
+    public Void visitDefSwLbl(JavaParser.DefSwLblContext ctx) {
+        out.print(ctx.DEFAULT().getText());
+        out.print(":");
+        return null;
+    }
+
+    @Override
+    public Void visitEnhanForCtrl(JavaParser.EnhanForCtrlContext ctx) {
+        visit(ctx.enhancedForControl());
+        return null;
+    }
+
+    @Override
+    public Void visitForInitForCtrl(JavaParser.ForInitForCtrlContext ctx) {
+        if (ctx.forInit() != null) {
+            visit(ctx.forInit());
+        }
+        out.print(";");
+        if (ctx.expression() != null) {
+            visit(ctx.expression());
+        }
+        out.print(";");
+        if (ctx.expressionList() != null) {
+            visit(ctx.expressionList());
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitForInitVar(JavaParser.ForInitVarContext ctx) {
+        visit(ctx.localVariableDeclaration());
+        return null;
+    }
+
+    @Override
+    public Void visitForInitExprL(JavaParser.ForInitExprLContext ctx) {
+        visit(ctx.expressionList());
+        return null;
+    }
+
+    @Override
+    public Void visitEnhancedForControl(JavaParser.EnhancedForControlContext ctx) {
+        for (JavaParser.VariableModifierContext mod : ctx.variableModifier()) {
+            visit(mod);
+        }
+        if (ctx.typeType() != null) {
+            visit(ctx.typeType());
+        } else {
+            out.print(ctx.VAR().getText());
+        }
+        visit(ctx.variableDeclaratorId());
+        out.print(":");
+        visit(ctx.expression());
+        return null;
+    }
+
+    @Override
+    public Void visitParExpression(JavaParser.ParExpressionContext ctx) {
+        out.print("(");
+        visit(ctx.expression());
+        out.print(")");
+        return null;
+    }
 
     @Override
     public Void visitExpressionList(JavaParser.ExpressionListContext ctx) {
@@ -377,6 +1838,19 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
                 visit(ctx.expression(i));
             }
         }
+        return null;
+    }
+
+    @Override
+    public Void visitMethodCall(JavaParser.MethodCallContext ctx) {
+        if (ctx.identifier() != null) {
+            visit(ctx.identifier());
+        } else if (ctx.THIS() != null) {
+            out.print(ctx.THIS().getText());
+        } else {
+            out.print(ctx.SUPER().getText());
+        }
+        visit(ctx.arguments());
         return null;
     }
 
@@ -406,7 +1880,7 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
         } else if(ctx.THIS() != null) {
             out.print(ctx.THIS().getText());
         } else if(ctx.NEW() != null) {
-            out.print(ctx.NEW().getText());
+            out.print(ctx.NEW().getText() + " ");
             if (ctx.nonWildcardTypeArguments() != null) {
                 visit(ctx.nonWildcardTypeArguments());
             }
@@ -447,7 +1921,7 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
             }
             visit(ctx.identifier());
         } else {
-            out.print(ctx.NEW().getText());
+            out.print(ctx.NEW().getText() + " ");
         }
         return null;
     }
@@ -459,7 +1933,7 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
         if(ctx.typeArguments() != null) {
             visit(ctx.typeArguments());
         }
-        out.print(ctx.NEW().getText());
+        out.print(ctx.NEW().getText() + " ");
         return null;
     }
     @Override
@@ -502,7 +1976,7 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitObjCreateExpr(JavaParser.ObjCreateExprContext ctx) {
-        out.print(ctx.NEW().getText());
+        out.print(ctx.NEW().getText() + " ");
         visit(ctx.creator());
         return null;
     }
@@ -510,7 +1984,7 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitMultOpExpr(JavaParser.MultOpExprContext ctx) {
         visit(ctx.expression(0));
-        out.print(ctx.bop.getText());
+        out.print(ctx.bop.getText() + " ");
         visit(ctx.expression(1));
         return null;
     }
@@ -518,7 +1992,7 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitAddOpExpr(JavaParser.AddOpExprContext ctx) {
         visit(ctx.expression(0));
-        out.print(ctx.bop.getText());
+        out.print(ctx.bop.getText() + " ");
         visit(ctx.expression(1));
         return null;
     }
@@ -540,7 +2014,7 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitRelOpExpr(JavaParser.RelOpExprContext ctx) {
         visit(ctx.expression(0));
-        out.print(ctx.bop.getText());
+        out.print(ctx.bop.getText() + " ");
         visit(ctx.expression(1));
         return null;
     }
@@ -548,7 +2022,7 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitInstOfOpExpr(JavaParser.InstOfOpExprContext ctx) {
         visit(ctx.expression());
-        out.print(ctx.bop.getText());
+        out.print(ctx.bop.getText() + " ");
         if (ctx.typeType() != null) {
             visit(ctx.typeType());
         } else {
@@ -560,7 +2034,7 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitEquaOpExpr(JavaParser.EquaOpExprContext ctx) {
         visit(ctx.expression(0));
-        out.print(ctx.bop.getText());
+        out.print(ctx.bop.getText() + " ");
         visit(ctx.expression(1));
         return null;
     }
@@ -568,7 +2042,7 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitBitAndOpExpr(JavaParser.BitAndOpExprContext ctx) {
         visit(ctx.expression(0));
-        out.print(ctx.bop.getText());
+        out.print(ctx.bop.getText() + " ");
         visit(ctx.expression(1));
         return null;
     }
@@ -576,7 +2050,7 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitBitXorOpExpr(JavaParser.BitXorOpExprContext ctx) {
         visit(ctx.expression(0));
-        out.print(ctx.bop.getText());
+        out.print(ctx.bop.getText() + " ");
         visit(ctx.expression(1));
         return null;
     }
@@ -584,7 +2058,7 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitBitOrExpr(JavaParser.BitOrExprContext ctx) {
         visit(ctx.expression(0));
-        out.print(ctx.bop.getText());
+        out.print(ctx.bop.getText() + " ");
         visit(ctx.expression(1));
         return null;
     }
@@ -592,7 +2066,7 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitLogAndExpr(JavaParser.LogAndExprContext ctx) {
         visit(ctx.expression(0));
-        out.print(ctx.bop.getText());
+        out.print(ctx.bop.getText() + " ");
         visit(ctx.expression(1));
         return null;
     }
@@ -600,7 +2074,7 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitLogOrExpr(JavaParser.LogOrExprContext ctx) {
         visit(ctx.expression(0));
-        out.print(ctx.bop.getText());
+        out.print(ctx.bop.getText() + " ");
         visit(ctx.expression(1));
         return null;
     }
@@ -608,7 +2082,7 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitTernExpr(JavaParser.TernExprContext ctx) {
         visit(ctx.expression(0));
-        out.print(ctx.bop.getText());
+        out.print(ctx.bop.getText() + " ");
         visit(ctx.expression(1));
         out.print(":");
         visit(ctx.expression(2));
@@ -618,7 +2092,7 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitAssignExpr(JavaParser.AssignExprContext ctx) {
         visit(ctx.expression(0));
-        out.print(ctx.bop.getText());
+        out.print(ctx.bop.getText() + " ");
         visit(ctx.expression(1));
         return null;
     }
@@ -755,178 +2229,254 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitIntLit(JavaParser.IntLitContext ctx) {
-        visit(ctx.integerLiteral());
-        return null;
-    }
-
-    @Override
-    public Void visitFloatLit(JavaParser.FloatLitContext ctx) {
-        visit(ctx.floatLiteral());
-        return null;
-    }
-
-    @Override
-    public Void visitCharLit(JavaParser.CharLitContext ctx) {
-        out.print(ctx.CHAR_LITERAL().getText());
-        return null;
-    }
-
-    @Override
-    public Void visitStringLit(JavaParser.StringLitContext ctx) {
-        out.print(ctx.STRING_LITERAL().getText());
-        return null;
-    }
-
-    @Override
-    public Void visitBoolLit(JavaParser.BoolLitContext ctx) {
-        out.print(ctx.BOOL_LITERAL().getText());
-        return null;
-    }
-
-    @Override
-    public Void visitNullLit(JavaParser.NullLitContext ctx) {
-        out.print(ctx.NULL_LITERAL().getText());
-        return null;
-    }
-
-    @Override
-    public Void visitTxtBlocLit(JavaParser.TxtBlocLitContext ctx) {
-        out.print(ctx.TEXT_BLOCK().getText());
-        return null;
-    }
-
-    @Override
-    public Void visitTypeTypeOrVoid(JavaParser.TypeTypeOrVoidContext ctx) {
-        if (ctx.typeType() != null) {
-            visit(ctx.typeType());
-        } else if (ctx.VOID() != null) {
-            out.print(ctx.getText() + " ");
+    public Void visitSwitchExpression(JavaParser.SwitchExpressionContext ctx) {
+        out.print(ctx.SWITCH().getText());
+        visit(ctx.parExpression());
+        out.print("{\n");
+        addTab();
+        printTabs();
+        for(JavaParser.SwitchLabeledRuleContext rule : ctx.switchLabeledRule()) {
+            visit(rule);
         }
+        remTab();
+        printTabs();
+        out.print("}\n");
         return null;
     }
 
     @Override
-     public Void visitFormalParameters(JavaParser.FormalParametersContext ctx) {
-        out.print("(");
-        if (ctx.receiverParameter() != null) {
-            visit(ctx.receiverParameter());
-            if (ctx.formalParameterList() != null) {
-                out.print(", ");
-                visit(ctx.formalParameterList());
-            }
-        } else if(ctx.formalParameterList() != null) {
-            visit(ctx.formalParameterList());
-        }
-        out.print(") ");
-        return null;
-    }
-
-    @Override
-    public Void visitReceiverParameter(JavaParser.ReceiverParameterContext ctx) {
-        visit(ctx.typeType());
-        int i = 0;
-        if (ctx.identifier(i) != null) {
-            visit(ctx.identifier(i));
-            i++;
-            while (ctx.identifier(i) != null) {
-                out.print(".");
-                visit(ctx.identifier(i));
-                i++;
-            }
-        }
-        out.print("this");
-        return null;
-    }
-
-    @Override
-    public Void visitFormalParameterList(JavaParser.FormalParameterListContext ctx) {
-        if (ctx.formalParameter(0) != null) {
-            int i = 0;
-            visit(ctx.formalParameter(i));
-
-            i++;
-            while (ctx.formalParameter(i) != null) {
-                out.print(", ");
-                visit(ctx.formalParameter(i));
-                i++;
-            }
-
-            if (ctx.lastFormalParameter() != null) {
-                visit(ctx.lastFormalParameter());
-            }
+    public Void visitCaseSwLblRule(JavaParser.CaseSwLblRuleContext ctx) {
+        out.print(ctx.CASE().getText());
+        if (ctx.expressionList() != null) {
+            visit(ctx.expressionList());
+        } else if(ctx.NULL_LITERAL() != null) {
+            out.print(ctx.NULL_LITERAL().getText());
         } else {
-            visit(ctx.lastFormalParameter());
+            visit(ctx.guardedPattern());
         }
+        if (ctx.ARROW() != null) {
+            out.print(ctx.ARROW().getText());
+        } else {
+            out.print(ctx.COLON().getText());
+        }
+        visit(ctx.switchRuleOutcome());
         return null;
-
     }
 
     @Override
-    public Void visitFormalParameter(JavaParser.FormalParameterContext ctx) {
-        if (ctx.variableModifier(0) != null) {
-            for (JavaParser.VariableModifierContext modifier: ctx.variableModifier()) {
-                visit(modifier);
+    public Void visitDefSwLblRule(JavaParser.DefSwLblRuleContext ctx) {
+        out.print(ctx.DEFAULT().getText());
+        if (ctx.ARROW() != null) {
+            out.print(ctx.ARROW().getText());
+        } else {
+            out.print(ctx.COLON().getText());
+        }
+        visit(ctx.switchRuleOutcome());
+        return null;
+    }
 
-            }
+    @Override
+    public Void visitGuardPatt(JavaParser.GuardPattContext ctx) {
+        out.print("(");
+        visit(ctx.guardedPattern());
+        out.print(")");
+        return null;
+    }
+
+    @Override
+    public Void visitVarModGrdPatt(JavaParser.VarModGrdPattContext ctx) {
+        for(JavaParser.VariableModifierContext mod : ctx.variableModifier()) {
+            visit(mod);
         }
         visit(ctx.typeType());
-        visit(ctx.variableDeclaratorId());
+        for (JavaParser.AnnotationContext annot : ctx.annotation()) {
+            visit(annot);
+        }
+        visit(ctx.identifier());
+        int i = 0;
+        while(ctx.expression(i) != null) {
+            out.print(" && ");
+            visit(ctx.expression(i));
+            i++;
+        }
         return null;
     }
 
     @Override
-    public Void visitQualifiedName(JavaParser.QualifiedNameContext ctx) {
+    public Void visitExprGrdPatt(JavaParser.ExprGrdPattContext ctx) {
+        visit(ctx.guardedPattern());
+        out.print(" && ");
+        visit(ctx.expression());
+        return null;
+    }
+
+    @Override
+    public Void visitBlckSwRuleOut(JavaParser.BlckSwRuleOutContext ctx) {
+        visit(ctx.block());
+        return null;
+    }
+
+    @Override
+    public Void visitBlckStmtSwRuleOut(JavaParser.BlckStmtSwRuleOutContext ctx) {
+        for (JavaParser.BlockStatementContext block : ctx.blockStatement()) {
+            visit(block);
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitClassType(JavaParser.ClassTypeContext ctx) {
+        if(ctx.classOrInterfaceType() != null) {
+            visit(ctx.classOrInterfaceType());
+            out.print(".");
+        }
+        for (JavaParser.AnnotationContext annot : ctx.annotation()) {
+            visit(annot);
+        }
+        visit(ctx.identifier());
+        if (ctx.typeArguments() != null) {
+            visit(ctx.typeArguments());
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitNonWildCreate(JavaParser.NonWildCreateContext ctx) {
+        if (ctx.nonWildcardTypeArguments() != null) {
+            visit(ctx.nonWildcardTypeArguments());
+        }
+        visit(ctx.createdName());
+        visit(ctx.classCreatorRest());
+        return null;
+    }
+
+    @Override
+    public Void visitArrayCreate(JavaParser.ArrayCreateContext ctx) {
+        visit(ctx.createdName());
+        visit(ctx.arrayCreatorRest());
+        return null;
+    }
+
+    @Override
+    public Void visitIdentCreate(JavaParser.IdentCreateContext ctx) {
         int i = 0;
+        int j = 0;
         visit(ctx.identifier(i));
         i++;
+        if(ctx.typeArgumentsOrDiamond(j) != null) {
+            visit(ctx.typeArgumentsOrDiamond(j));
+        }
+        j++;
         while (ctx.identifier(i) != null) {
             out.print(".");
             visit(ctx.identifier(i));
             i++;
+            if (ctx.typeArgumentsOrDiamond(j) != null) {
+                visit(ctx.typeArgumentsOrDiamond(j));
+            }
+            j++;
         }
         return null;
     }
 
     @Override
-    public Void visitVariableDeclaratorId(JavaParser.VariableDeclaratorIdContext ctx) {
-        out.print(" " + ctx.getText());
-        if (ctx.getText().contains("[")) {
+    public Void visitPrimCreate(JavaParser.PrimCreateContext ctx) {
+        visit(ctx.primitiveType());
+        return null;
+    }
+
+    @Override
+    public Void visitInnerCreator(JavaParser.InnerCreatorContext ctx) {
+        visit(ctx.identifier());
+        if(ctx.nonWildcardTypeArgumentsOrDiamond() != null) {
+            visit(ctx.nonWildcardTypeArgumentsOrDiamond());
+        }
+        visit(ctx.classCreatorRest());
+        return null;
+    }
+
+    @Override
+    public Void visitArrayInitCreate(JavaParser.ArrayInitCreateContext ctx) {
+        for(int i = 0; i < ctx.LBRACK().size(); i++) {
+            out.print("[]");
+        }
+        visit(ctx.arrayInitializer());
+        return null;
+    }
+
+    @Override
+    public Void visitArrayExprCreate(JavaParser.ArrayExprCreateContext ctx) {
+        for(JavaParser.ExpressionContext expr : ctx.expression()){
+            out.print("[");
+            visit(expr);
+            out.print("]");
+        }
+        for(int i = 0; i < ctx.LBRACK().size(); i++) {
             out.print("[]");
         }
         return null;
     }
 
     @Override
-    public Void visitLastFormalParameter(JavaParser.LastFormalParameterContext ctx) {
-        if (ctx.variableModifier(0) != null) {
-            for (JavaParser.VariableModifierContext modifier: ctx.variableModifier()) {
-                visit(modifier);
-            }
-        }
-        if (ctx.annotation(0) != null) {
-            for (JavaParser.AnnotationContext annotation: ctx.annotation()) {
-                visit(annotation);
-            }
-        }
-        visit(ctx.typeType());
-        visit(ctx.variableDeclaratorId());
-        return null;
-    }
-
-    @Override
-    public Void visitVariableModifier(JavaParser.VariableModifierContext ctx) {
-        if (ctx.annotation() != null) {
-            visit(ctx.annotation());
-        } else {
-            out.print("FINAL ");
+    public Void visitClassCreatorRest(JavaParser.ClassCreatorRestContext ctx) {
+        visit(ctx.arguments());
+        if(ctx.classBody() != null) {
+            visit(ctx.classBody());
         }
         return null;
     }
 
     @Override
-    public Void visitAnnotation(JavaParser.AnnotationContext ctx) {
-        // may not need this right now
+    public Void visitExplicitGenericInvocation(JavaParser.ExplicitGenericInvocationContext ctx) {
+        visit(ctx.nonWildcardTypeArguments());
+        if (ctx.explicitGenericInvocationSuffix() != null) {
+            visit(ctx.explicitGenericInvocationSuffix());
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitDiamond(JavaParser.DiamondContext ctx) {
+        out.print("<>");
+        return null;
+    }
+
+    @Override
+    public Void visitTypeArgs(JavaParser.TypeArgsContext ctx) {
+        visit(ctx.typeArguments());
+        return null;
+    }
+
+    @Override
+    public Void visitNonWildDiamond(JavaParser.NonWildDiamondContext ctx) {
+        out.print("<>");
+        return null;
+    }
+
+    @Override
+    public Void visitNonWildTypeArgs(JavaParser.NonWildTypeArgsContext ctx) {
+        visit(ctx.nonWildcardTypeArguments());
+        return null;
+    }
+
+    @Override
+    public Void visitNonWildcardTypeArguments(JavaParser.NonWildcardTypeArgumentsContext ctx) {
+        out.print("<");
+        visit(ctx.typeList());
+        out.print(">");
+        return null;
+    }
+
+    @Override
+    public Void visitTypeList(JavaParser.TypeListContext ctx) {
+        int i = 0;
+        visit(ctx.typeType(i));
+        i++;
+        while(ctx.typeType(i) != null) {
+            out.print(",");
+            visit(ctx.typeType(i));
+            i++;
+        }
         return null;
     }
 
@@ -949,32 +2499,8 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitClassOrInterfaceType(JavaParser.ClassOrInterfaceTypeContext ctx) {
-        int i = 0;
-        if (ctx.identifier(0) != null) {
-            visit(ctx.identifier(i));
-            i++;
-            while (ctx.identifier(i) != null && i < ctx.identifier().size() - 1) {
-                out.print(" ");
-                visit(ctx.identifier(i));
-                if (ctx.typeArguments(i) != null) {
-                    out.print(" ");
-                    visit(ctx.typeArguments(i));
-                }
-                i++;
-            }
-            out.print(".");
-        }
-        visit(ctx.typeIdentifier());
-        if (ctx.typeArguments(i) != null) {
-            visit(ctx.typeArguments(i));
-        }
-        return null;
-    }
-
-    @Override
-    public Void visitIdentifier(JavaParser.IdentifierContext ctx) {
-        out.print(ctx.getText());
+    public Void visitPrimitiveType(JavaParser.PrimitiveTypeContext ctx) {
+        out.print(ctx.getText() + " ");
         return null;
     }
 
@@ -990,33 +2516,35 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitTypeArgument(JavaParser.TypeArgumentContext ctx) {
-        if (ctx.getText().contains("?")) {
-            if (ctx.annotation(0) != null) {
-                for (JavaParser.AnnotationContext annotation : ctx.annotation()) {
-                    visit(annotation);
-                }
-            }
-            out.print("? ");
-            if (ctx.SUPER() != null) {
-                out.print("SUPER");
-            } else {
-                out.print("EXTENDS");
-            }
+    public Void visitArgsSupSuffix(JavaParser.ArgsSupSuffixContext ctx) {
+        visit(ctx.arguments());
+        return null;
+    }
+
+    @Override
+    public Void visitTypeArgsSupSuffix(JavaParser.TypeArgsSupSuffixContext ctx) {
+        out.print(".");
+        if(ctx.typeArguments() != null){
+            visit(ctx.typeArguments());
         }
-        visit(ctx.typeType());
+        visit(ctx.identifier());
+        if(ctx.arguments() != null) {
+            visit(ctx.arguments());
+        }
         return null;
     }
 
     @Override
-    public Void visitPrimitiveType(JavaParser.PrimitiveTypeContext ctx) {
-        out.print(ctx.getText() + " ");
+    public Void visitSuperInvoSuffix(JavaParser.SuperInvoSuffixContext ctx) {
+        out.print(ctx.SUPER().getText());
+        visit(ctx.superSuffix());
         return null;
     }
 
     @Override
-    public Void visitTypeIdentifier(JavaParser.TypeIdentifierContext ctx) {
-        out.print(ctx.getText());
+    public Void visitIdentInvoSuffix(JavaParser.IdentInvoSuffixContext ctx) {
+        visit(ctx.identifier());
+        visit(ctx.arguments());
         return null;
     }
 

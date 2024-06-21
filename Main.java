@@ -19,7 +19,7 @@ public class Main {
             if (!args[i].contains(".java")) {
                 continue;
             } else {
-                outfile = args[i].substring(0, args[i].length() - 5) + "1.java";
+                outfile = args[i].substring(0, args[i].length() - 5) + "Out.java";
             }
             JavaLexer lexer = null;
             try {
@@ -57,8 +57,12 @@ public class Main {
             }
         }
         try {
-            out.close();
-            file.close();
+            if (out != null) {
+                out.close();
+            }
+            if (file != null) {
+                file.close();
+            }
         } catch (IOException e) {
             System.out.println("An error occurred.");
             e.printStackTrace();

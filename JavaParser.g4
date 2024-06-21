@@ -34,8 +34,8 @@ parser grammar JavaParser;
 options { tokenVocab=JavaLexer; }
 
 compilationUnit
-    : packageDeclaration? (importDeclaration | ';')* (typeDeclaration | ';')*
-    | moduleDeclaration EOF
+    : packageDeclaration? (importDeclaration | ';')* (typeDeclaration | ';')*                   #compUnitPack
+    | moduleDeclaration EOF                                                                     #compUnitEOF
     ;
 
 packageDeclaration
@@ -43,7 +43,7 @@ packageDeclaration
     ;
 
 importDeclaration
-    : IMPORT STATIC? qualifiedName ('.' '*')? ';'
+    : IMPORT STATIC? qualifiedName (DOT MUL)? ';'
     ;
 
 typeDeclaration
@@ -52,29 +52,29 @@ typeDeclaration
     ;
 
 modifier
-    : classOrInterfaceModifier
-    | NATIVE
-    | SYNCHRONIZED
-    | TRANSIENT
-    | VOLATILE
+    : classOrInterfaceModifier                                              #classOrIntMod
+    | NATIVE                                                                #nativeMod
+    | SYNCHRONIZED                                                          #syncMod
+    | TRANSIENT                                                             #transMod
+    | VOLATILE                                                              #volaMod
     ;
 
 classOrInterfaceModifier
-    : annotation                                                            //#annotate
-    | PUBLIC                                                                //#pubmod
-    | PROTECTED                                                             //#protmod
-    | PRIVATE                                                               //#privmod
-    | STATIC                                                                //#statmod
-    | ABSTRACT                                                              //#abstrmod
-    | FINAL    /* FINAL for class only -- does not apply to interfaces */   //#finmod
-    | STRICTFP                                                              //#strimod
-    | SEALED /* Java17 */                                                   //#sealmod
-    | NON_SEALED /* Java17 */                                               //#nsealmod
+    : annotation                                                            #annotate
+    | PUBLIC                                                                #pubMod
+    | PROTECTED                                                             #protMod
+    | PRIVATE                                                               #privMod
+    | STATIC                                                                #statMod
+    | ABSTRACT                                                              #abstrMod
+    | FINAL    /* FINAL for class only -- does not apply to interfaces */   #finMod
+    | STRICTFP                                                              #striMod
+    | SEALED /* Java17 */                                                   #sealMod
+    | NON_SEALED /* Java17 */                                               #nsealMod
     ;
 
 variableModifier
-    : FINAL
-    | annotation
+    : FINAL                                                                 #finVarMod
+    | annotation                                                            #annotVarMod
     ;
 
 classDeclaration
@@ -98,7 +98,7 @@ typeBound
     ;
 
 enumDeclaration
-    : ENUM identifier (IMPLEMENTS typeList)? '{' enumConstants? ','? enumBodyDeclarations? '}'
+    : ENUM identifier (IMPLEMENTS typeList)? '{' enumConstants? COMMA? enumBodyDeclarations? '}'
     ;
 
 enumConstants
@@ -126,22 +126,22 @@ interfaceBody
     ;
 
 classBodyDeclaration
-    : ';'
-    | STATIC? block
-    | modifier* memberDeclaration
+    : ';'                                       #classBodyDeclSemi
+    | STATIC? block                             #classBodyDeclStatic
+    | modifier* memberDeclaration               #classBodyDeclMod
     ;
 
 memberDeclaration
-    : recordDeclaration //Java17
-    | methodDeclaration
-    | genericMethodDeclaration
-    | fieldDeclaration
-    | constructorDeclaration
-    | genericConstructorDeclaration
-    | interfaceDeclaration
-    | annotationTypeDeclaration
-    | classDeclaration
-    | enumDeclaration
+    : recordDeclaration /*Java17*/              #recDecl
+    | methodDeclaration                         #methDecl
+    | genericMethodDeclaration                  #genMethDecl
+    | fieldDeclaration                          #fieldDecl
+    | constructorDeclaration                    #consDecl
+    | genericConstructorDeclaration             #genConsDecl
+    | interfaceDeclaration                      #intDecl
+    | annotationTypeDeclaration                 #annotTypeDecl
+    | classDeclaration                          #classDecl
+    | enumDeclaration                           #enumDecl
     ;
 
 /* We use rule this even for void methods which cannot have [] after parameters.
@@ -156,13 +156,13 @@ methodDeclaration
     ;
 
 methodBody
-    : block
-    | ';'
+    : block                         #methBodyBlock
+    | ';'                           #methBodySemi
     ;
 
 typeTypeOrVoid
-    : typeType
-    | VOID
+    : typeType                      #tyType
+    | VOID                          #void
     ;
 
 genericMethodDeclaration
@@ -186,19 +186,19 @@ fieldDeclaration
     ;
 
 interfaceBodyDeclaration
-    : modifier* interfaceMemberDeclaration
-    | ';'
+    : modifier* interfaceMemberDeclaration                          #intBodyMod
+    | ';'                                                           #intBodySemi
     ;
 
 interfaceMemberDeclaration
-    : recordDeclaration // Java17
-    | constDeclaration
-    | interfaceMethodDeclaration
-    | genericInterfaceMethodDeclaration
-    | interfaceDeclaration
-    | annotationTypeDeclaration
-    | classDeclaration
-    | enumDeclaration
+    : recordDeclaration /* Java17 */                                #intRecDecl
+    | constDeclaration                                              #intConsDecl
+    | interfaceMethodDeclaration                                    #intMethDecl
+    | genericInterfaceMethodDeclaration                             #genIntMethDecl
+    | interfaceDeclaration                                          #intIntDecl
+    | annotationTypeDeclaration                                     #annotDecl
+    | classDeclaration                                              #intClassDecl
+    | enumDeclaration                                               #intEnumDecl
     ;
 
 constDeclaration
@@ -206,7 +206,7 @@ constDeclaration
     ;
 
 constantDeclarator
-    : identifier ('[' ']')* '=' variableInitializer
+    : identifier (LBRACK RBRACK)* '=' variableInitializer
     ;
 
 // Early versions of Java allows brackets after the method name, eg.
@@ -219,12 +219,12 @@ interfaceMethodDeclaration
 
 // Java8
 interfaceMethodModifier
-    : annotation
-    | PUBLIC
-    | ABSTRACT
-    | DEFAULT
-    | STATIC
-    | STRICTFP
+    : annotation                                        #intAnnotMod
+    | PUBLIC                                            #intPubMod
+    | ABSTRACT                                          #intAbsMod
+    | DEFAULT                                           #intDefMod
+    | STATIC                                            #intStatMod
+    | STRICTFP                                          #intStriMod
     ;
 
 genericInterfaceMethodDeclaration
@@ -232,7 +232,7 @@ genericInterfaceMethodDeclaration
     ;
 
 interfaceCommonBodyDeclaration
-    : annotation* typeTypeOrVoid identifier formalParameters ('[' ']')* (THROWS qualifiedNameList)? methodBody
+    : annotation* typeTypeOrVoid identifier formalParameters (LBRACK RBRACK)* (THROWS qualifiedNameList)? methodBody
     ;
 
 variableDeclarators
@@ -244,16 +244,16 @@ variableDeclarator
     ;
 
 variableDeclaratorId
-    : identifier ('[' ']')*
+    : identifier (LBRACK RBRACK)*
     ;
 
 variableInitializer
-    : arrayInitializer
-    | expression
+    : arrayInitializer                              #arrayInit
+    | expression                                    #varExprInit
     ;
 
 arrayInitializer
-    : '{' (variableInitializer (',' variableInitializer)* ','? )? '}'
+    : '{' (variableInitializer (',' variableInitializer)* COMMA? )? '}'
     ;
 
 classOrInterfaceType
@@ -261,8 +261,8 @@ classOrInterfaceType
     ;
 
 typeArgument
-    : typeType
-    | annotation* '?' ((EXTENDS | SUPER) typeType)?
+    : typeType                                                  #tyTyTypeArg
+    | annotation* '?' ((EXTENDS | SUPER) typeType)?             #tyTyAnnot
     ;
 
 qualifiedNameList
@@ -317,15 +317,15 @@ literal
     ;
 
 integerLiteral
-    : DECIMAL_LITERAL
-    | HEX_LITERAL
-    | OCT_LITERAL
-    | BINARY_LITERAL
+    : DECIMAL_LITERAL                                       #decLit
+    | HEX_LITERAL                                           #hexLit
+    | OCT_LITERAL                                           #octLit
+    | BINARY_LITERAL                                        #binLit
     ;
 
 floatLiteral
-    : FLOAT_LITERAL
-    | HEX_FLOAT_LITERAL
+    : FLOAT_LITERAL                                         #actFloatLit
+    | HEX_FLOAT_LITERAL                                     #hexFloatLit
     ;
 
 // ANNOTATIONS
@@ -334,7 +334,7 @@ altAnnotationQualifiedName
     ;
 
 annotation
-    : ('@' qualifiedName | altAnnotationQualifiedName) ('(' ( elementValuePairs | elementValue )? ')')?
+    : ('@' qualifiedName | altAnnotationQualifiedName) (LPAREN ( elementValuePairs | elementValue )? RPAREN)?
     ;
 
 elementValuePairs
@@ -346,13 +346,13 @@ elementValuePair
     ;
 
 elementValue
-    : expression
-    | annotation
-    | elementValueArrayInitializer
+    : expression                                                #exprElVal
+    | annotation                                                #annotElVal
+    | elementValueArrayInitializer                              #arrayElVal
     ;
 
 elementValueArrayInitializer
-    : '{' (elementValue (',' elementValue)*)? ','? '}'
+    : '{' (elementValue (',' elementValue)*)? COMMA? '}'
     ;
 
 annotationTypeDeclaration
@@ -369,17 +369,17 @@ annotationTypeElementDeclaration
     ;
 
 annotationTypeElementRest
-    : typeType annotationMethodOrConstantRest ';'
-    | classDeclaration ';'?
-    | interfaceDeclaration ';'?
-    | enumDeclaration ';'?
-    | annotationTypeDeclaration ';'?
-    | recordDeclaration ';'? // Java17
+    : typeType annotationMethodOrConstantRest ';'                   #annotTyTy
+    | classDeclaration SEMI?                                        #annotClass
+    | interfaceDeclaration SEMI?                                    #annotInt
+    | enumDeclaration SEMI?                                         #annotEnum
+    | annotationTypeDeclaration SEMI?                               #annotType
+    | recordDeclaration SEMI? /* Java17 */                          #annotRec
     ;
 
 annotationMethodOrConstantRest
-    : annotationMethodRest
-    | annotationConstantRest
+    : annotationMethodRest                                          #annotMeth
+    | annotationConstantRest                                        #annotConst
     ;
 
 annotationMethodRest
@@ -405,16 +405,16 @@ moduleBody
     ;
 
 moduleDirective
-	: REQUIRES requiresModifier* qualifiedName ';'
-	| EXPORTS qualifiedName (TO qualifiedName)? ';'
-	| OPENS qualifiedName (TO qualifiedName)? ';'
-	| USES qualifiedName ';'
-	| PROVIDES qualifiedName WITH qualifiedName ';'
+	: REQUIRES requiresModifier* qualifiedName ';'                              #modReq
+	| EXPORTS qualifiedName (TO qualifiedName)? ';'                             #modExp
+	| OPENS qualifiedName (TO qualifiedName)? ';'                               #modOpen
+	| USES qualifiedName ';'                                                    #modUses
+	| PROVIDES qualifiedName WITH qualifiedName ';'                             #modProv
 	;
 
 requiresModifier
-	: TRANSITIVE
-	| STATIC
+	: TRANSITIVE                                                                #reqTrans
+	| STATIC                                                                    #reqStat
 	;
 
 // RECORDS - Java 17
@@ -499,25 +499,25 @@ localTypeDeclaration
     ;
 
 statement
-    : blockLabel=block
-    | ASSERT expression (':' expression)? ';'
-    | IF parExpression statement (ELSE statement)?
-    | FOR '(' forControl ')' statement
-    | WHILE parExpression statement
-    | DO statement WHILE parExpression ';'
-    | TRY block (catchClause+ finallyBlock? | finallyBlock)
-    | TRY resourceSpecification block catchClause* finallyBlock?
-    | SWITCH parExpression '{' switchBlockStatementGroup* switchLabel* '}'
-    | SYNCHRONIZED parExpression block
-    | RETURN expression? ';'
-    | THROW expression ';'
-    | BREAK identifier? ';'
-    | CONTINUE identifier? ';'
-    | YIELD expression ';' // Java17
-    | SEMI
-    | statementExpression=expression ';'
-    | switchExpression ';'? // Java17
-    | identifierLabel=identifier ':' statement
+    : blockLabel=block                                                              #blockStmt
+    | ASSERT expression (':' expression)? ';'                                       #assertStmt
+    | IF parExpression statement (ELSE statement)?                                  #ifStmt
+    | FOR '(' forControl ')' statement                                              #forStmt
+    | WHILE parExpression statement                                                 #whileStmt
+    | DO statement WHILE parExpression ';'                                          #doStmt
+    | TRY block (catchClause+ finallyBlock? | finallyBlock)                         #tryBlockStmt
+    | TRY resourceSpecification block catchClause* finallyBlock?                    #tryStmt
+    | SWITCH parExpression '{' switchBlockStatementGroup* switchLabel* '}'          #switchStmt
+    | SYNCHRONIZED parExpression block                                              #syncStmt
+    | RETURN expression? ';'                                                        #returnStmt
+    | THROW expression ';'                                                          #throwStmt
+    | BREAK identifier? ';'                                                         #breakStmt
+    | CONTINUE identifier? ';'                                                      #contStmt
+    | YIELD expression ';' /* Java17 */                                             #yieldStmt
+    | SEMI                                                                          #semiStmt
+    | statementExpression=expression ';'                                            #exprStmt
+    | switchExpression SEMI? /* Java17 */                                           #swtchExprStmt
+    | identifierLabel=identifier ':' statement                                      #identStmt
     ;
 
 catchClause
@@ -533,7 +533,7 @@ finallyBlock
     ;
 
 resourceSpecification
-    : '(' resources ';'? ')'
+    : '(' resources SEMI? ')'
     ;
 
 resources
@@ -541,8 +541,8 @@ resources
     ;
 
 resource
-    : variableModifier* ( classOrInterfaceType variableDeclaratorId | VAR identifier ) '=' expression
-    | qualifiedName
+    : variableModifier* ( classOrInterfaceType variableDeclaratorId | VAR identifier ) '=' expression       #varRes
+    | qualifiedName                                                                                         #qualRes
     ;
 
 /** Matches cases then statements, both of which are mandatory.
@@ -553,18 +553,18 @@ switchBlockStatementGroup
     ;
 
 switchLabel
-    : CASE (constantExpression=expression | enumConstantName=IDENTIFIER | typeType varName=identifier) ':'
-    | DEFAULT ':'
+    : CASE (constantExpression=expression | enumConstantName=IDENTIFIER | typeType varName=identifier) ':'  #caseSwLbl
+    | DEFAULT ':'                                                                                           #defSwLbl
     ;
 
 forControl
-    : enhancedForControl
-    | forInit? ';' expression? ';' forUpdate=expressionList?
+    : enhancedForControl                                                        #enhanForCtrl
+    | forInit? ';' expression? ';' forUpdate=expressionList?                    #forInitForCtrl
     ;
 
 forInit
-    : localVariableDeclaration
-    | expressionList
+    : localVariableDeclaration                                                  #forInitVar
+    | expressionList                                                            #forInitExprL
     ;
 
 enhancedForControl
@@ -680,21 +680,21 @@ switchExpression
 
 // Java17
 switchLabeledRule
-    : CASE (expressionList | NULL_LITERAL | guardedPattern) (ARROW | COLON) switchRuleOutcome
-    | DEFAULT (ARROW | COLON) switchRuleOutcome
+    : CASE (expressionList | NULL_LITERAL | guardedPattern) (ARROW | COLON) switchRuleOutcome       #caseSwLblRule
+    | DEFAULT (ARROW | COLON) switchRuleOutcome                                                     #defSwLblRule
     ;
 
 // Java17
 guardedPattern
-    : '(' guardedPattern ')'
-    | variableModifier* typeType annotation* identifier ('&&' expression)*
-    | guardedPattern '&&' expression
+    : '(' guardedPattern ')'                                                                #guardPatt
+    | variableModifier* typeType annotation* identifier ('&&' expression)*                  #varModGrdPatt
+    | guardedPattern '&&' expression                                                        #exprGrdPatt
     ;
 
 // Java17
 switchRuleOutcome
-    : block
-    | blockStatement*
+    : block                                                                                 #blckSwRuleOut
+    | blockStatement*                                                                       #blckStmtSwRuleOut
     ;
 
 classType
@@ -702,13 +702,13 @@ classType
     ;
 
 creator
-    : nonWildcardTypeArguments? createdName classCreatorRest
-    | createdName arrayCreatorRest
+    : nonWildcardTypeArguments? createdName classCreatorRest                                #nonWildCreate
+    | createdName arrayCreatorRest                                                          #arrayCreate
     ;
 
 createdName
-    : identifier typeArgumentsOrDiamond? ('.' identifier typeArgumentsOrDiamond?)*
-    | primitiveType
+    : identifier typeArgumentsOrDiamond? ('.' identifier typeArgumentsOrDiamond?)*          #identCreate
+    | primitiveType                                                                         #primCreate
     ;
 
 innerCreator
@@ -716,8 +716,8 @@ innerCreator
     ;
 
 arrayCreatorRest
-    : ('[' ']')+ arrayInitializer
-    | ('[' expression ']')+ ('[' ']')*
+    : (LBRACK RBRACK)+ arrayInitializer                                                     #arrayInitCreate
+    | ('[' expression ']')+ (LBRACK RBRACK)*                                                #arrayExprCreate
     ;
 
 classCreatorRest
@@ -729,13 +729,13 @@ explicitGenericInvocation
     ;
 
 typeArgumentsOrDiamond
-    : '<' '>'
-    | typeArguments
+    : '<' '>'                                                                               #diamond
+    | typeArguments                                                                         #typeArgs
     ;
 
 nonWildcardTypeArgumentsOrDiamond
-    : '<' '>'
-    | nonWildcardTypeArguments
+    : '<' '>'                                                                               #nonWildDiamond
+    | nonWildcardTypeArguments                                                              #nonWildTypeArgs
     ;
 
 nonWildcardTypeArguments
@@ -766,13 +766,13 @@ typeArguments
     ;
 
 superSuffix
-    : arguments
-    | '.' typeArguments? identifier arguments?
+    : arguments                                                                             #argsSupSuffix
+    | '.' typeArguments? identifier arguments?                                              #typeArgsSupSuffix
     ;
 
 explicitGenericInvocationSuffix
-    : SUPER superSuffix
-    | identifier arguments
+    : SUPER superSuffix                                                                     #superInvoSuffix
+    | identifier arguments                                                                  #identInvoSuffix
     ;
 
 arguments

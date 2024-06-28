@@ -1,14 +1,13 @@
-import java.beans.JavaBean;
 import java.io.*;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
-public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
+public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     PrintWriter out;
     int tabs;
 
-    public HelloWorldVisitor(PrintWriter out) {
+    public ParallelVisitor(PrintWriter out) {
         this.out = out;
         this.tabs = 0;
     }
@@ -231,11 +230,27 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
         return null;
     }
 
-//    @Override
-//    public Void visitTypeParameter(JavaParser.TypeParameterContext ctx) {
-//
-//        return null;
-//    }
+    @Override
+    public Void visitTypeParameter(JavaParser.TypeParameterContext ctx) {
+        for(JavaParser.FirstAnnotationContext fAnnot : ctx.firstAnnotation()) {
+            visit(fAnnot);
+        }
+        visit(ctx.identifier());
+        if(ctx.EXTENDS() != null) {
+            out.print(ctx.EXTENDS().getText() + " ");
+            for(JavaParser.AnnotationContext annot : ctx.annotation()) {
+                visit(annot);
+            }
+            visit(ctx.typeBound());
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitFirstAnnotation(JavaParser.FirstAnnotationContext ctx) {
+        visit(ctx.annotation());
+        return null;
+    }
 
     @Override
     public Void visitTypeBound(JavaParser.TypeBoundContext ctx) {
@@ -336,7 +351,9 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
         out.print("{\n");
         addTab();
         printTabs();
-        visit(ctx.classBodyDeclaration(0));
+        for(JavaParser.ClassBodyDeclarationContext body : ctx.classBodyDeclaration()) {
+            visit(body);
+        }
         out.println("}\n");
         return null;
     }
@@ -759,21 +776,23 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitClassOrInterfaceType(JavaParser.ClassOrInterfaceTypeContext ctx) {
-        int i = 0;
-        while (ctx.identifier(i) != null) {
-            visit(ctx.identifier(i));
-            out.print(" ");
-            if (ctx.typeArguments(i) != null) {
-                out.print(" ");
-                visit(ctx.typeArguments(i));
-            }
-            out.print(".");
-            i++;
+        for(JavaParser.LeadingPartContext lead : ctx.leadingPart()) {
+            visit(lead);
         }
         visit(ctx.typeIdentifier());
-        if (ctx.typeArguments(i) != null) {
-            visit(ctx.typeArguments(i));
+        if (ctx.typeArguments() != null) {
+            visit(ctx.typeArguments());
         }
+        return null;
+    }
+
+    @Override
+    public Void visitLeadingPart(JavaParser.LeadingPartContext ctx) {
+        visit(ctx.identifier());
+        if (ctx.typeArguments() != null) {
+            visit(ctx.typeArguments());
+        }
+        out.print(".");
         return null;
     }
 
@@ -1583,7 +1602,7 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitReturnStmt(JavaParser.ReturnStmtContext ctx) {
-        out.print(ctx.RETURN().getText());
+        out.print(ctx.RETURN().getText() + " ");
         if(ctx.expression() != null) {
             visit(ctx.expression());
         }
@@ -2482,18 +2501,27 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitTypeType(JavaParser.TypeTypeContext ctx) {
-        if (ctx.annotation(0) != null) {            // may need to separate these out
-            for (JavaParser.AnnotationContext annotation: ctx.annotation()) {
-                visit(annotation);
-            }
+        for(JavaParser.FirstAnnotationContext fAnnot : ctx.firstAnnotation()) {
+            visit(fAnnot);
         }
-        if (ctx.classOrInterfaceType() != null) {
+        if(ctx.classOrInterfaceType() != null) {
             visit(ctx.classOrInterfaceType());
         } else {
             visit(ctx.primitiveType());
         }
-        if (ctx.getText().contains("[")) {
+        int i = 0;
+        while (ctx.LBRACK(i) != null) {
+            visit(ctx.annotationList(i));
             out.print("[]");
+            i++;
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitAnnotationList(JavaParser.AnnotationListContext ctx) {
+        for(JavaParser.AnnotationContext annot : ctx.annotation()) {
+            visit(annot);
         }
         return null;
     }
@@ -2507,9 +2535,13 @@ public class HelloWorldVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitTypeArguments(JavaParser.TypeArgumentsContext ctx) {
         out.print("<");
-        for (JavaParser.TypeArgumentContext argument: ctx.typeArgument()) {
-            visit(argument);
+        int i = 0;
+        visit(ctx.typeArgument(i));
+        i++;
+        while (ctx.typeArgument(i) != null) {
             out.print(", ");
+            visit(ctx.typeArgument(i));
+            i++;
         }
         out.print(">");
         return null;

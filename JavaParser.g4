@@ -90,7 +90,11 @@ typeParameters
     ;
 
 typeParameter
-    : annotation* identifier (EXTENDS annotation* typeBound)?
+    : firstAnnotation* identifier (EXTENDS annotation* typeBound)?
+    ;
+
+firstAnnotation
+    : annotation
     ;
 
 typeBound
@@ -257,7 +261,11 @@ arrayInitializer
     ;
 
 classOrInterfaceType
-    : (identifier typeArguments? '.')* typeIdentifier typeArguments?
+    : leadingPart* typeIdentifier typeArguments?
+    ;
+
+leadingPart
+    : identifier typeArguments? '.'
     ;
 
 typeArgument
@@ -747,7 +755,11 @@ typeList
     ;
 
 typeType
-    : annotation* (classOrInterfaceType | primitiveType) (annotation* '[' ']')*
+    : firstAnnotation* (classOrInterfaceType | primitiveType) (annotationList LBRACK RBRACK)*
+    ;
+
+annotationList
+    : annotation*
     ;
 
 primitiveType

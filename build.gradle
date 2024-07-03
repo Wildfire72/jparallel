@@ -1,0 +1,42 @@
+plugins {
+    id "java"
+    id "application"
+    id "antlr"
+}
+
+//mainClassName = 'Main'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    antlr 'org.antlr:antlr4:4.13.1'
+    implementation 'org.antlr:antlr4-runtime:4.13.1'
+}
+
+generateGrammarSource {
+    maxHeapSize = "64m"
+    arguments += [ "-visitor",
+                   "-long-messages",
+                   /*"-package", "SSI"*/]
+    outputDirectory = file("${projectDir}/src/generated/java")
+}
+
+clean {
+    delete file("${projectDir}/src/generated")
+}
+
+sourceSets {
+    generated{
+        java.srcDir "${projectDir}/src/generated/java/"
+    }
+
+    main {
+        java.srcDirs += "${projectDir}/src/generated/java/"
+    }
+}
+
+application {
+    mainClass = 'Main'
+}

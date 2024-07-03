@@ -1,5 +1,0 @@
-#!/bin/bash
-
-rm -f *Out.java *.class *.interp *.tokens JavaLexer.java JavaParser.java JavaParserBaseVisitor.java JavaParserVisitor.java out.java
-
-echo "All clean!"

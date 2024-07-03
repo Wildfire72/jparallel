@@ -1,0 +1,11 @@
+#!/bin/bash
+
+gradle run --args="$*"
+
+javac *Out.java
+if [[ "$*" == *"Main.java"* ]]
+then
+    java Main.java
+else
+    java *Out.java
+fi

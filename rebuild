@@ -1,7 +1,0 @@
-bash clean
-bash build
-java Main $1
-inFile=$1
-outFile=${inFile/.java/Out.java}
-outClass=${outFile/.java/}
-javac $outFile && java $outClass

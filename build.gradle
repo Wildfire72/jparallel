@@ -18,7 +18,7 @@ dependencies {
 generateGrammarSource {
     maxHeapSize = "64m"
     arguments += [ "-visitor",
-                   "-long-messages",
+                   "-long-messages"//,
                    /*"-package", "SSI"*/]
     outputDirectory = file("${projectDir}/src/generated/java")
 }
@@ -34,6 +34,20 @@ sourceSets {
 
     main {
         java.srcDirs += "${projectDir}/src/generated/java/"
+    }
+}
+
+task copy(type: Copy) {
+    from "${projectDir}"
+    into "${projectDir}/src/generated/output/"
+    include "*Out.java"
+
+    rename { fileName ->
+        "${(fileName - 'Out')}"
+    }
+
+    delete fileTree(${projectDir}).matching {
+        include "*Out.java"
     }
 }
 

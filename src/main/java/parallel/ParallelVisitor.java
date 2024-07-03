@@ -50,7 +50,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitPackageDeclaration(JavaParser.PackageDeclarationContext ctx) {
-        for(JavaParser.AnnotationContext annot : ctx.annotation()) {
+        for (JavaParser.AnnotationContext annot : ctx.annotation()) {
             visit(annot);
         }
         out.print(ctx.PACKAGE().getText() + " ");
@@ -66,7 +66,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
             out.print(ctx.STATIC().getText() + " ");
         }
         visit(ctx.qualifiedName());
-        if(ctx.DOT() != null) {
+        if (ctx.DOT() != null) {
             out.print(".*");
         }
         out.print(";\n");
@@ -75,7 +75,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitTypeDeclaration(JavaParser.TypeDeclarationContext ctx) {
-        for(JavaParser.ClassOrInterfaceModifierContext mod : ctx.classOrInterfaceModifier()) {
+        for (JavaParser.ClassOrInterfaceModifierContext mod : ctx.classOrInterfaceModifier()) {
             visit(mod);
         }
         if (ctx.classDeclaration() != null) {
@@ -204,7 +204,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
             out.print(ctx.EXTENDS().getText() + " ");
             visit(ctx.typeType());
         }
-        if(ctx.IMPLEMENTS() != null) {
+        if (ctx.IMPLEMENTS() != null) {
             out.print(ctx.IMPLEMENTS().getText() + " ");
             visit(ctx.typeList(0));
         }
@@ -222,7 +222,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         int i = 0;
         visit(ctx.typeParameter(i));
         i++;
-        while(ctx.typeParameter(i) != null) {
+        while (ctx.typeParameter(i) != null) {
             out.print(", ");
             visit(ctx.typeParameter(i));
         }
@@ -232,13 +232,13 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitTypeParameter(JavaParser.TypeParameterContext ctx) {
-        for(JavaParser.FirstAnnotationContext fAnnot : ctx.firstAnnotation()) {
+        for (JavaParser.FirstAnnotationContext fAnnot : ctx.firstAnnotation()) {
             visit(fAnnot);
         }
         visit(ctx.identifier());
-        if(ctx.EXTENDS() != null) {
+        if (ctx.EXTENDS() != null) {
             out.print(ctx.EXTENDS().getText() + " ");
-            for(JavaParser.AnnotationContext annot : ctx.annotation()) {
+            for (JavaParser.AnnotationContext annot : ctx.annotation()) {
                 visit(annot);
             }
             visit(ctx.typeBound());
@@ -275,7 +275,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         out.print("{\n");
         addTab();
         printTabs();
-        if (ctx.enumConstants() !=null) {
+        if (ctx.enumConstants() != null) {
             visit(ctx.enumConstants());
         }
         if (ctx.COMMA() != null) {
@@ -299,20 +299,21 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         while (ctx.enumConstant(i) != null) {
             out.print(", ");
             visit(ctx.enumConstant(i));
+            i++;
         }
         return null;
     }
 
     @Override
     public Void visitEnumConstant(JavaParser.EnumConstantContext ctx) {
-        for(JavaParser.AnnotationContext annot : ctx.annotation()) {
+        for (JavaParser.AnnotationContext annot : ctx.annotation()) {
             visit(annot);
         }
         visit(ctx.identifier());
         if (ctx.arguments() != null) {
             visit(ctx.arguments());
         }
-        if(ctx.classBody() != null) {
+        if (ctx.classBody() != null) {
             visit(ctx.classBody());
         }
         return null;
@@ -331,7 +332,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     public Void visitInterfaceDeclaration(JavaParser.InterfaceDeclarationContext ctx) {
         out.print(ctx.INTERFACE().getText() + " ");
         visit(ctx.identifier());
-        if(ctx.typeParameters() != null) {
+        if (ctx.typeParameters() != null) {
             visit(ctx.typeParameters());
         }
         if (ctx.EXTENDS() != null) {
@@ -351,7 +352,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         out.print("{\n");
         addTab();
         printTabs();
-        for(JavaParser.ClassBodyDeclarationContext body : ctx.classBodyDeclaration()) {
+        for (JavaParser.ClassBodyDeclarationContext body : ctx.classBodyDeclaration()) {
             visit(body);
         }
         out.println("}\n");
@@ -382,7 +383,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitClassBodyDeclStatic(JavaParser.ClassBodyDeclStaticContext ctx) {
-        if(ctx.STATIC() != null) {
+        if (ctx.STATIC() != null) {
             out.print(ctx.STATIC().getText() + " ");
         }
         visit(ctx.block());
@@ -391,7 +392,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitClassBodyDeclMod(JavaParser.ClassBodyDeclModContext ctx) {
-        for(JavaParser.ModifierContext mod : ctx.modifier()) {
+        for (JavaParser.ModifierContext mod : ctx.modifier()) {
             visit(mod);
         }
         visit(ctx.memberDeclaration());
@@ -529,12 +530,12 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitCompactConstructorDeclaration(JavaParser.CompactConstructorDeclarationContext ctx) {
-        for(JavaParser.ModifierContext mod : ctx.modifier()) {
+        for (JavaParser.ModifierContext mod : ctx.modifier()) {
             visit(mod);
         }
         visit(ctx.identifier());
         visit(ctx.block());
-        return  null;
+        return null;
     }
 
     @Override
@@ -616,7 +617,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         int i = 0;
         visit(ctx.constantDeclarator(i));
         i++;
-        while(ctx.constantDeclarator(i) != null) {
+        while (ctx.constantDeclarator(i) != null) {
             out.print(", ");
             visit(ctx.constantDeclarator(i));
             i++;
@@ -639,7 +640,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitInterfaceMethodDeclaration(JavaParser.InterfaceMethodDeclarationContext ctx) {
-        for(JavaParser.InterfaceMethodModifierContext mod : ctx.interfaceMethodModifier()) {
+        for (JavaParser.InterfaceMethodModifierContext mod : ctx.interfaceMethodModifier()) {
             visit(mod);
         }
         visit(ctx.interfaceCommonBodyDeclaration());
@@ -655,7 +656,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitIntPubMod(JavaParser.IntPubModContext ctx) {
         out.print(ctx.PUBLIC().getText() + " ");
-        return  null;
+        return null;
     }
 
     @Override
@@ -663,6 +664,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         out.print(ctx.ABSTRACT().getText() + " ");
         return null;
     }
+
     @Override
     public Void visitIntDefMod(JavaParser.IntDefModContext ctx) {
         out.print(ctx.DEFAULT().getText() + " ");
@@ -683,7 +685,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitGenericInterfaceMethodDeclaration(JavaParser.GenericInterfaceMethodDeclarationContext ctx) {
-        for(JavaParser.InterfaceMethodModifierContext mod : ctx.interfaceMethodModifier()) {
+        for (JavaParser.InterfaceMethodModifierContext mod : ctx.interfaceMethodModifier()) {
             visit(mod);
         }
         visit(ctx.typeParameters());
@@ -693,16 +695,16 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitInterfaceCommonBodyDeclaration(JavaParser.InterfaceCommonBodyDeclarationContext ctx) {
-        for(JavaParser.AnnotationContext annot : ctx.annotation()) {
+        for (JavaParser.AnnotationContext annot : ctx.annotation()) {
             visit(annot);
         }
         visit(ctx.typeTypeOrVoid());
         visit(ctx.identifier());
         visit(ctx.formalParameters());
-        for(int i = 0; i < ctx.LBRACK().size(); i++) {
+        for (int i = 0; i < ctx.LBRACK().size(); i++) {
             out.print("[]");
         }
-        if(ctx.qualifiedNameList() != null) {
+        if (ctx.qualifiedNameList() != null) {
             out.print(ctx.THROWS().getText() + " ");
             visit(ctx.qualifiedNameList());
         }
@@ -715,7 +717,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         int i = 0;
         visit(ctx.variableDeclarator(i));
         i++;
-        while(ctx.variableDeclarator(i) != null) {
+        while (ctx.variableDeclarator(i) != null) {
             out.print(", ");
             visit(ctx.variableDeclarator(i));
             i++;
@@ -726,7 +728,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitVariableDeclarator(JavaParser.VariableDeclaratorContext ctx) {
         visit(ctx.variableDeclaratorId());
-        if(ctx.variableInitializer() != null) {
+        if (ctx.variableInitializer() != null) {
             out.print(" = ");
             visit(ctx.variableInitializer());
         }
@@ -758,10 +760,10 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     public Void visitArrayInitializer(JavaParser.ArrayInitializerContext ctx) {
         out.print("{");
         int i = 0;
-        if(ctx.variableInitializer(i) != null) {
+        if (ctx.variableInitializer(i) != null) {
             visit(ctx.variableInitializer(i));
             i++;
-            while(ctx.variableInitializer(i) != null) {
+            while (ctx.variableInitializer(i) != null) {
                 out.print(", ");
                 visit(ctx.variableInitializer(i));
                 i++;
@@ -776,7 +778,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitClassOrInterfaceType(JavaParser.ClassOrInterfaceTypeContext ctx) {
-        for(JavaParser.LeadingPartContext lead : ctx.leadingPart()) {
+        for (JavaParser.LeadingPartContext lead : ctx.leadingPart()) {
             visit(lead);
         }
         visit(ctx.typeIdentifier());
@@ -804,7 +806,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitTyTyAnnot(JavaParser.TyTyAnnotContext ctx) {
-        for(JavaParser.AnnotationContext annot : ctx.annotation()) {
+        for (JavaParser.AnnotationContext annot : ctx.annotation()) {
             visit(annot);
         }
         out.print("?");
@@ -824,7 +826,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         int i = 0;
         visit(ctx.qualifiedName(i));
         i++;
-        while(ctx.qualifiedName(i) != null) {
+        while (ctx.qualifiedName(i) != null) {
             out.print(", ");
             visit(ctx.qualifiedName(i));
             i++;
@@ -841,7 +843,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
                 out.print(", ");
                 visit(ctx.formalParameterList());
             }
-        } else if(ctx.formalParameterList() != null) {
+        } else if (ctx.formalParameterList() != null) {
             visit(ctx.formalParameterList());
         }
         out.print(") ");
@@ -885,7 +887,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitFormalParameter(JavaParser.FormalParameterContext ctx) {
         if (ctx.variableModifier(0) != null) {
-            for (JavaParser.VariableModifierContext modifier: ctx.variableModifier()) {
+            for (JavaParser.VariableModifierContext modifier : ctx.variableModifier()) {
                 visit(modifier);
             }
         }
@@ -897,13 +899,13 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitLastFormalParameter(JavaParser.LastFormalParameterContext ctx) {
         if (ctx.variableModifier(0) != null) {
-            for (JavaParser.VariableModifierContext modifier: ctx.variableModifier()) {
+            for (JavaParser.VariableModifierContext modifier : ctx.variableModifier()) {
                 visit(modifier);
             }
         }
         visit(ctx.typeType());
         if (ctx.annotation(0) != null) {
-            for (JavaParser.AnnotationContext annotation: ctx.annotation()) {
+            for (JavaParser.AnnotationContext annotation : ctx.annotation()) {
                 visit(annotation);
             }
         }
@@ -917,7 +919,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         int i = 0;
         visit(ctx.lambdaLVTIParameter(i));
         i++;
-        while(ctx.lambdaLVTIParameter(i) != null) {
+        while (ctx.lambdaLVTIParameter(i) != null) {
             out.print(", ");
             visit(ctx.lambdaLVTIParameter(i));
             i++;
@@ -927,7 +929,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitLambdaLVTIParameter(JavaParser.LambdaLVTIParameterContext ctx) {
-        for(JavaParser.VariableModifierContext mod : ctx.variableModifier()) {
+        for (JavaParser.VariableModifierContext mod : ctx.variableModifier()) {
             visit(mod);
         }
         out.print(ctx.VAR().getText() + " ");
@@ -999,13 +1001,13 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitHexLit(JavaParser.HexLitContext ctx) {
         out.print(ctx.HEX_LITERAL().getText());
-        return  null;
+        return null;
     }
 
     @Override
     public Void visitOctLit(JavaParser.OctLitContext ctx) {
         out.print(ctx.OCT_LITERAL().getText());
-        return  null;
+        return null;
     }
 
     @Override
@@ -1017,7 +1019,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitActFloatLit(JavaParser.ActFloatLitContext ctx) {
         out.print(ctx.FLOAT_LITERAL().getText());
-        return  null;
+        return null;
     }
 
     @Override
@@ -1029,7 +1031,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitAltAnnotationQualifiedName(JavaParser.AltAnnotationQualifiedNameContext ctx) {
         int i = 0;
-        while(ctx.DOT(i) != null) {
+        while (ctx.DOT(i) != null) {
             visit(ctx.identifier(0));
             out.print(ctx.DOT(i).getText());
             i++;
@@ -1044,15 +1046,15 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         if (ctx.qualifiedName() != null) {
             out.print("@");
             visit(ctx.qualifiedName());
-        } else if(ctx.altAnnotationQualifiedName() != null) {
+        } else if (ctx.altAnnotationQualifiedName() != null) {
             out.print("@");
             visit(ctx.altAnnotationQualifiedName());
         }
-        if(ctx.LPAREN() != null) {
+        if (ctx.LPAREN() != null) {
             out.print(ctx.LPAREN().getText());
             if (ctx.elementValuePairs() != null) {
                 visit(ctx.elementValuePairs());
-            } else if (ctx.elementValue() != null){
+            } else if (ctx.elementValue() != null) {
                 visit(ctx.elementValue());
             }
             out.print(ctx.RPAREN().getText());
@@ -1065,7 +1067,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         int i = 0;
         visit(ctx.elementValuePair(i));
         i++;
-        while(ctx.elementValuePair(i) != null) {
+        while (ctx.elementValuePair(i) != null) {
             out.print(", ");
             visit(ctx.elementValuePair(i));
             i++;
@@ -1107,13 +1109,13 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
             visit(ctx.elementValue(i));
             i++;
         }
-        while(ctx.elementValue(i) != null) {
+        while (ctx.elementValue(i) != null) {
             out.print(", ");
             visit(ctx.elementValue(i));
             i++;
         }
-        if(ctx.COMMA(i-1) != null) {
-            out.print(ctx.COMMA(i-1).getText());
+        if (ctx.COMMA(i - 1) != null) {
+            out.print(ctx.COMMA(i - 1).getText());
         }
         out.print("}");
         return null;
@@ -1133,7 +1135,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         out.print("{\n");
         addTab();
         printTabs();
-        for(JavaParser.AnnotationTypeElementDeclarationContext element : ctx.annotationTypeElementDeclaration()) {
+        for (JavaParser.AnnotationTypeElementDeclarationContext element : ctx.annotationTypeElementDeclaration()) {
             visit(element);
         }
         remTab();
@@ -1144,7 +1146,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitAnnotationTypeElementDeclaration(JavaParser.AnnotationTypeElementDeclarationContext ctx) {
-        if(ctx.annotationTypeElementRest() != null) {
+        if (ctx.annotationTypeElementRest() != null) {
             for (JavaParser.ModifierContext mod : ctx.modifier()) {
                 visit(mod);
             }
@@ -1168,7 +1170,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitAnnotClass(JavaParser.AnnotClassContext ctx) {
         visit(ctx.classDeclaration());
-        if(ctx.SEMI() != null) {
+        if (ctx.SEMI() != null) {
             out.print(ctx.SEMI().getText() + "\n");
         }
         return null;
@@ -1177,7 +1179,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitAnnotInt(JavaParser.AnnotIntContext ctx) {
         visit(ctx.interfaceDeclaration());
-        if(ctx.SEMI() != null) {
+        if (ctx.SEMI() != null) {
             out.print(ctx.SEMI().getText() + "\n");
         }
         return null;
@@ -1186,7 +1188,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitAnnotEnum(JavaParser.AnnotEnumContext ctx) {
         visit(ctx.enumDeclaration());
-        if(ctx.SEMI() != null) {
+        if (ctx.SEMI() != null) {
             out.print(ctx.SEMI().getText() + "\n");
         }
         return null;
@@ -1195,7 +1197,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitAnnotType(JavaParser.AnnotTypeContext ctx) {
         visit(ctx.annotationTypeDeclaration());
-        if(ctx.SEMI() != null) {
+        if (ctx.SEMI() != null) {
             out.print(ctx.SEMI().getText() + "\n");
         }
         return null;
@@ -1204,7 +1206,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitAnnotRec(JavaParser.AnnotRecContext ctx) {
         visit(ctx.recordDeclaration());
-        if(ctx.SEMI() != null) {
+        if (ctx.SEMI() != null) {
             out.print(ctx.SEMI().getText() + "\n");
         }
         return null;
@@ -1247,7 +1249,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitModuleDeclaration(JavaParser.ModuleDeclarationContext ctx) {
-        if(ctx.OPEN() != null) {
+        if (ctx.OPEN() != null) {
             out.print(ctx.OPEN().getText());
         }
         out.print(ctx.MODULE().getText());
@@ -1261,7 +1263,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         out.print("{\n");
         addTab();
         printTabs();
-        for(JavaParser.ModuleDirectiveContext dir : ctx.moduleDirective()) {
+        for (JavaParser.ModuleDirectiveContext dir : ctx.moduleDirective()) {
             visit(dir);
         }
         remTab();
@@ -1273,7 +1275,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitModReq(JavaParser.ModReqContext ctx) {
         out.print(ctx.REQUIRES().getText() + " ");
-        for(JavaParser.RequiresModifierContext req : ctx.requiresModifier()) {
+        for (JavaParser.RequiresModifierContext req : ctx.requiresModifier()) {
             visit(req);
         }
         visit(ctx.qualifiedName());
@@ -1286,7 +1288,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     public Void visitModExp(JavaParser.ModExpContext ctx) {
         out.print(ctx.EXPORTS().getText() + " ");
         visit(ctx.qualifiedName(0));
-        if(ctx.qualifiedName(1) != null) {
+        if (ctx.qualifiedName(1) != null) {
             out.print(ctx.TO().getText());
             visit(ctx.qualifiedName(1));
         }
@@ -1299,7 +1301,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     public Void visitModOpen(JavaParser.ModOpenContext ctx) {
         out.print(ctx.OPENS().getText() + " ");
         visit(ctx.qualifiedName(0));
-        if(ctx.qualifiedName(1) != null) {
+        if (ctx.qualifiedName(1) != null) {
             out.print(ctx.TO().getText());
             visit(ctx.qualifiedName(1));
         }
@@ -1371,7 +1373,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         int i = 0;
         visit(ctx.recordComponent(i));
         i++;
-        while(ctx.recordComponent(i) != null) {
+        while (ctx.recordComponent(i) != null) {
             out.print(", ");
             visit(ctx.recordComponent(i));
             i++;
@@ -1392,7 +1394,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         addTab();
         printTabs();
         int i = 0;
-        while(ctx.classBodyDeclaration(i) != null || ctx.compactConstructorDeclaration(i) != null) {
+        while (ctx.classBodyDeclaration(i) != null || ctx.compactConstructorDeclaration(i) != null) {
             if (ctx.classBodyDeclaration(i) != null) {
                 visit(ctx.classBodyDeclaration(i));
                 i++;
@@ -1412,7 +1414,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         out.print("{\n");
         addTab();
         if (ctx.blockStatement(0) != null) {
-            for (JavaParser.BlockStatementContext stmt: ctx.blockStatement()) {
+            for (JavaParser.BlockStatementContext stmt : ctx.blockStatement()) {
                 printTabs();
                 visit(stmt);
             }
@@ -1440,7 +1442,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitLocalVariableDeclaration(JavaParser.LocalVariableDeclarationContext ctx) {
         if (ctx.variableModifier(0) != null) {
-            for (JavaParser.VariableModifierContext modifier: ctx.variableModifier()) {
+            for (JavaParser.VariableModifierContext modifier : ctx.variableModifier()) {
                 visit(modifier);
             }
         }
@@ -1458,7 +1460,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitIdentifier(JavaParser.IdentifierContext ctx) {
-        if(ctx.getText().contains(".")) {
+        if (ctx.getText().contains(".")) {
             out.print(ctx.getText());
         } else {
             out.print(ctx.getText() + " ");
@@ -1475,7 +1477,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitLocalTypeDeclaration(JavaParser.LocalTypeDeclarationContext ctx) {
         if (ctx.classOrInterfaceModifier(0) != null) {
-            for (JavaParser.ClassOrInterfaceModifierContext modifierContext: ctx.classOrInterfaceModifier()) {
+            for (JavaParser.ClassOrInterfaceModifierContext modifierContext : ctx.classOrInterfaceModifier()) {
                 visit(modifierContext);
             }
         }
@@ -1580,10 +1582,10 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         out.print("{\n");
         addTab();
         printTabs();
-        for(JavaParser.SwitchBlockStatementGroupContext group : ctx.switchBlockStatementGroup()) {
+        for (JavaParser.SwitchBlockStatementGroupContext group : ctx.switchBlockStatementGroup()) {
             visit(group);
         }
-        for(JavaParser.SwitchLabelContext label : ctx.switchLabel()) {
+        for (JavaParser.SwitchLabelContext label : ctx.switchLabel()) {
             visit(label);
         }
         remTab();
@@ -1603,7 +1605,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitReturnStmt(JavaParser.ReturnStmtContext ctx) {
         out.print(ctx.RETURN().getText() + " ");
-        if(ctx.expression() != null) {
+        if (ctx.expression() != null) {
             visit(ctx.expression());
         }
         out.print(";\n");
@@ -1621,7 +1623,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitBreakStmt(JavaParser.BreakStmtContext ctx) {
         out.print(ctx.BREAK().getText());
-        if(ctx.identifier() != null) {
+        if (ctx.identifier() != null) {
             visit(ctx.identifier());
         }
         out.print(";\n");
@@ -1631,7 +1633,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitContStmt(JavaParser.ContStmtContext ctx) {
         out.print(ctx.CONTINUE().getText());
-        if(ctx.identifier() != null) {
+        if (ctx.identifier() != null) {
             visit(ctx.identifier());
         }
         out.print(";\n");
@@ -1648,7 +1650,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitSemiStmt(JavaParser.SemiStmtContext ctx) {
-        out.print(ctx.SEMI().getText()+"\n");
+        out.print(ctx.SEMI().getText() + "\n");
         return null;
     }
 
@@ -1662,7 +1664,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitSwtchExprStmt(JavaParser.SwtchExprStmtContext ctx) {
         visit(ctx.switchExpression());
-        if(ctx.SEMI() != null) {
+        if (ctx.SEMI() != null) {
             out.print(ctx.SEMI().getText());
         }
         return null;
@@ -1695,7 +1697,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         int i = 0;
         visit(ctx.qualifiedName(i));
         i++;
-        while(ctx.qualifiedName(i) != null) {
+        while (ctx.qualifiedName(i) != null) {
             out.print("|");
             visit(ctx.qualifiedName(i));
             i++;
@@ -1726,7 +1728,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         int i = 0;
         visit(ctx.resource(i));
         i++;
-        while(ctx.resource(i) != null) {
+        while (ctx.resource(i) != null) {
             out.print(";");
             visit(ctx.resource(i));
             i++;
@@ -1736,7 +1738,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitVarRes(JavaParser.VarResContext ctx) {
-        for(JavaParser.VariableModifierContext mod : ctx.variableModifier()) {
+        for (JavaParser.VariableModifierContext mod : ctx.variableModifier()) {
             visit(mod);
         }
         if (ctx.VAR() == null) {
@@ -1771,7 +1773,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitCaseSwLbl(JavaParser.CaseSwLblContext ctx) {
         out.print(ctx.CASE().getText());
-        if(ctx.expression() != null) {
+        if (ctx.expression() != null) {
             visit(ctx.expression());
         } else if (ctx.IDENTIFIER() != null) {
             out.print(ctx.IDENTIFIER().getText());
@@ -1894,11 +1896,11 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         out.print(".");
         if (ctx.identifier() != null) {
             visit(ctx.identifier());
-        } else if(ctx.methodCall() != null) {
+        } else if (ctx.methodCall() != null) {
             visit(ctx.methodCall());
-        } else if(ctx.THIS() != null) {
+        } else if (ctx.THIS() != null) {
             out.print(ctx.THIS().getText());
-        } else if(ctx.NEW() != null) {
+        } else if (ctx.NEW() != null) {
             out.print(ctx.NEW().getText() + " ");
             if (ctx.nonWildcardTypeArguments() != null) {
                 visit(ctx.nonWildcardTypeArguments());
@@ -1907,7 +1909,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         } else if (ctx.SUPER() != null) {
             out.print(ctx.SUPER().getText());
             visit(ctx.superSuffix());
-        } else if(ctx.explicitGenericInvocation() != null) {
+        } else if (ctx.explicitGenericInvocation() != null) {
             visit(ctx.explicitGenericInvocation());
         }
         return null;
@@ -1935,7 +1937,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         visit(ctx.typeType());
         out.print("::");
         if (ctx.identifier() != null) {
-            if(ctx.typeArguments() != null) {
+            if (ctx.typeArguments() != null) {
                 visit(ctx.typeArguments());
             }
             visit(ctx.identifier());
@@ -1949,12 +1951,13 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     public Void visitMethRef3Expr(JavaParser.MethRef3ExprContext ctx) {
         visit(ctx.classType());
         out.print("::");
-        if(ctx.typeArguments() != null) {
+        if (ctx.typeArguments() != null) {
             visit(ctx.typeArguments());
         }
         out.print(ctx.NEW().getText() + " ");
         return null;
     }
+
     @Override
     public Void visitSwtchExpr(JavaParser.SwtchExprContext ctx) {
         visit(ctx.switchExpression());
@@ -1978,12 +1981,12 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitCastExpr(JavaParser.CastExprContext ctx) {
         out.print("(");
-        for(JavaParser.AnnotationContext annot : ctx.annotation()) {
+        for (JavaParser.AnnotationContext annot : ctx.annotation()) {
             visit(annot);
         }
         visit(ctx.typeType(0));
         if (ctx.typeType(1) != null) {
-            for(int i = 1; i < ctx.typeType().size(); i++) {
+            for (int i = 1; i < ctx.typeType().size(); i++) {
                 out.print("&");
                 visit(ctx.typeType(i));
             }
@@ -2254,7 +2257,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         out.print("{\n");
         addTab();
         printTabs();
-        for(JavaParser.SwitchLabeledRuleContext rule : ctx.switchLabeledRule()) {
+        for (JavaParser.SwitchLabeledRuleContext rule : ctx.switchLabeledRule()) {
             visit(rule);
         }
         remTab();
@@ -2268,7 +2271,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         out.print(ctx.CASE().getText());
         if (ctx.expressionList() != null) {
             visit(ctx.expressionList());
-        } else if(ctx.NULL_LITERAL() != null) {
+        } else if (ctx.NULL_LITERAL() != null) {
             out.print(ctx.NULL_LITERAL().getText());
         } else {
             visit(ctx.guardedPattern());
@@ -2304,7 +2307,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitVarModGrdPatt(JavaParser.VarModGrdPattContext ctx) {
-        for(JavaParser.VariableModifierContext mod : ctx.variableModifier()) {
+        for (JavaParser.VariableModifierContext mod : ctx.variableModifier()) {
             visit(mod);
         }
         visit(ctx.typeType());
@@ -2313,7 +2316,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         }
         visit(ctx.identifier());
         int i = 0;
-        while(ctx.expression(i) != null) {
+        while (ctx.expression(i) != null) {
             out.print(" && ");
             visit(ctx.expression(i));
             i++;
@@ -2345,7 +2348,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitClassType(JavaParser.ClassTypeContext ctx) {
-        if(ctx.classOrInterfaceType() != null) {
+        if (ctx.classOrInterfaceType() != null) {
             visit(ctx.classOrInterfaceType());
             out.print(".");
         }
@@ -2382,7 +2385,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         int j = 0;
         visit(ctx.identifier(i));
         i++;
-        if(ctx.typeArgumentsOrDiamond(j) != null) {
+        if (ctx.typeArgumentsOrDiamond(j) != null) {
             visit(ctx.typeArgumentsOrDiamond(j));
         }
         j++;
@@ -2407,7 +2410,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitInnerCreator(JavaParser.InnerCreatorContext ctx) {
         visit(ctx.identifier());
-        if(ctx.nonWildcardTypeArgumentsOrDiamond() != null) {
+        if (ctx.nonWildcardTypeArgumentsOrDiamond() != null) {
             visit(ctx.nonWildcardTypeArgumentsOrDiamond());
         }
         visit(ctx.classCreatorRest());
@@ -2416,7 +2419,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitArrayInitCreate(JavaParser.ArrayInitCreateContext ctx) {
-        for(int i = 0; i < ctx.LBRACK().size(); i++) {
+        for (int i = 0; i < ctx.LBRACK().size(); i++) {
             out.print("[]");
         }
         visit(ctx.arrayInitializer());
@@ -2425,12 +2428,12 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitArrayExprCreate(JavaParser.ArrayExprCreateContext ctx) {
-        for(JavaParser.ExpressionContext expr : ctx.expression()){
+        for (JavaParser.ExpressionContext expr : ctx.expression()) {
             out.print("[");
             visit(expr);
             out.print("]");
         }
-        for(int i = 0; i < ctx.LBRACK().size(); i++) {
+        for (int i = 0; i < ctx.LBRACK().size(); i++) {
             out.print("[]");
         }
         return null;
@@ -2439,7 +2442,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitClassCreatorRest(JavaParser.ClassCreatorRestContext ctx) {
         visit(ctx.arguments());
-        if(ctx.classBody() != null) {
+        if (ctx.classBody() != null) {
             visit(ctx.classBody());
         }
         return null;
@@ -2491,7 +2494,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         int i = 0;
         visit(ctx.typeType(i));
         i++;
-        while(ctx.typeType(i) != null) {
+        while (ctx.typeType(i) != null) {
             out.print(",");
             visit(ctx.typeType(i));
             i++;
@@ -2501,10 +2504,10 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitTypeType(JavaParser.TypeTypeContext ctx) {
-        for(JavaParser.FirstAnnotationContext fAnnot : ctx.firstAnnotation()) {
+        for (JavaParser.FirstAnnotationContext fAnnot : ctx.firstAnnotation()) {
             visit(fAnnot);
         }
-        if(ctx.classOrInterfaceType() != null) {
+        if (ctx.classOrInterfaceType() != null) {
             visit(ctx.classOrInterfaceType());
         } else {
             visit(ctx.primitiveType());
@@ -2520,7 +2523,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitAnnotationList(JavaParser.AnnotationListContext ctx) {
-        for(JavaParser.AnnotationContext annot : ctx.annotation()) {
+        for (JavaParser.AnnotationContext annot : ctx.annotation()) {
             visit(annot);
         }
         return null;
@@ -2590,3 +2593,4 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         return null;
     }
 }
+ 

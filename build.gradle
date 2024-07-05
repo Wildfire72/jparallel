@@ -4,7 +4,11 @@ plugins {
     id "antlr"
 }
 
-//mainClassName = 'Main'
+//java {
+//    toolchain {
+//        languageVersion = JavaLanguageVersion.of(11)
+//    }
+//}
 
 repositories {
     mavenCentral()
@@ -38,18 +42,28 @@ sourceSets {
 }
 
 task copy(type: Copy) {
+
     from "${projectDir}"
     into "${projectDir}/src/generated/output/"
     include "*Out.java"
-
     rename { fileName ->
         "${(fileName - 'Out')}"
     }
+}
 
-    delete fileTree(${projectDir}).matching {
+task delete(type: Delete){
+    delete fileTree(projectDir).matching {
         include "*Out.java"
     }
 }
+
+task compile(type: JavaCompile) {
+    source = files("${projectDir}/src/generated/output/")
+    classpath = files("${projectDir}/src/generated/output/")
+    destinationDirectory = file("${projectDir}/src/generated/output/")
+}
+
+delete.dependsOn copy
 
 application {
     mainClass = 'Main'

@@ -196,7 +196,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitClassDeclaration(JavaParser.ClassDeclarationContext ctx) {
-        out.print(ctx.CLASS().getText() + " " + ctx.identifier().getText() + "Out ");
+        out.print(ctx.CLASS().getText() + " " + ctx.identifier().getText() + " ");
         if (ctx.typeParameters() != null) {
             visit(ctx.typeParameters());
         }
@@ -1614,7 +1614,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitThrowStmt(JavaParser.ThrowStmtContext ctx) {
-        out.print(ctx.THROW().getText());
+        out.print(ctx.THROW().getText() + " ");
         visit(ctx.expression());
         out.print(";\n");
         return null;
@@ -1627,6 +1627,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
             visit(ctx.identifier());
         }
         out.print(";\n");
+        printTabs();
         return null;
     }
 
@@ -1651,6 +1652,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitSemiStmt(JavaParser.SemiStmtContext ctx) {
         out.print(ctx.SEMI().getText() + "\n");
+        printTabs();
         return null;
     }
 
@@ -1658,6 +1660,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     public Void visitExprStmt(JavaParser.ExprStmtContext ctx) {
         visit(ctx.expression());
         out.print(";\n");
+        printTabs();
         return null;
     }
 
@@ -1772,7 +1775,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitCaseSwLbl(JavaParser.CaseSwLblContext ctx) {
-        out.print(ctx.CASE().getText());
+        out.print(ctx.CASE().getText() + " ");
         if (ctx.expression() != null) {
             visit(ctx.expression());
         } else if (ctx.IDENTIFIER() != null) {
@@ -1781,14 +1784,20 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
             visit(ctx.typeType());
             visit(ctx.identifier());
         }
-        out.print(":");
+        out.print(":\n");
+        addTab();
+        printTabs();
+        remTab();
         return null;
     }
 
     @Override
     public Void visitDefSwLbl(JavaParser.DefSwLblContext ctx) {
         out.print(ctx.DEFAULT().getText());
-        out.print(":");
+        out.print(":\n");
+        addTab();
+        printTabs();
+        remTab();
         return null;
     }
 
@@ -1803,11 +1812,11 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         if (ctx.forInit() != null) {
             visit(ctx.forInit());
         }
-        out.print(";");
+        out.print("; ");
         if (ctx.expression() != null) {
             visit(ctx.expression());
         }
-        out.print(";");
+        out.print("; ");
         if (ctx.expressionList() != null) {
             visit(ctx.expressionList());
         }
@@ -2420,7 +2429,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitArrayInitCreate(JavaParser.ArrayInitCreateContext ctx) {
         for (int i = 0; i < ctx.LBRACK().size(); i++) {
-            out.print("[]");
+            out.print("[] ");
         }
         visit(ctx.arrayInitializer());
         return null;
@@ -2431,10 +2440,10 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         for (JavaParser.ExpressionContext expr : ctx.expression()) {
             out.print("[");
             visit(expr);
-            out.print("]");
+            out.print("] ");
         }
         for (int i = 0; i < ctx.LBRACK().size(); i++) {
-            out.print("[]");
+            out.print("[] ");
         }
         return null;
     }

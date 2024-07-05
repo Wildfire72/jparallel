@@ -2,13 +2,17 @@
 mkdir -p src/generated/output
 gradle run --args="$*"
 gradle copy
+gradle delete
+gradle compile
+
 #mv *Out.java src/generated/output
+#javac src/generated/output/Main.java
 
+#java -cp src/generated/output Main
 
-javac src/generated/output/*.*
 if [[ "$*" == *"Main.java"* ]]
 then
-    java src/generated/output/Main.java
+    java -cp src/generated/output Main
 else
-    java src/generated/output/*Out.java
+    java -cp src/generated/output/ "$*"
 fi

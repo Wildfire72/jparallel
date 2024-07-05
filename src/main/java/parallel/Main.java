@@ -32,7 +32,7 @@ public class Main {
             JavaParser parser = new JavaParser(tokens);
             ParseTree tree = parser.compilationUnit();
             if (tree == null) {
-                System.out.println("Could not parse.");
+                System.out.println("Could not parse at all.");
             }
 
             try {
@@ -44,30 +44,29 @@ public class Main {
                 e.printStackTrace();
             }
 
-            JavaParserBaseVisitor visitors [] = {
+            JavaParserBaseVisitor visitors[] = {
                     new ParallelVisitor(out)
             };
 
-            for (JavaParserBaseVisitor visitor: visitors) {
+            for (JavaParserBaseVisitor visitor : visitors) {
                 try {
                     visitor.visit(tree);
-                } catch(Exception e) {
+                } catch (Exception e) {
                     System.out.println("error visiting.");
                 }
             }
-        }
-        try {
-            if (out != null) {
-                out.close();
+            try {
+                if (out != null) {
+                    out.close();
+                }
+                if (file != null) {
+                    file.close();
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred.");
+                e.printStackTrace();
             }
-            if (file != null) {
-                file.close();
-            }
-        } catch (IOException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
         }
-
     }
 }
 

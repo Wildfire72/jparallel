@@ -83,6 +83,7 @@ TRY:                'try';
 VOID:               'void';
 VOLATILE:           'volatile';
 WHILE:              'while';
+PARALLEL:           'parallel';
 
 // Module related keywords
 MODULE:             'module';

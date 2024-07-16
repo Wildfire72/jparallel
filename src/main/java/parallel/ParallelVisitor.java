@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.tree.*;
 
 public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
+    static int numThreads;
     PrintWriter out;
     int tabs;
 
@@ -1433,8 +1434,67 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
             out.print(";\n");
         } else if (ctx.localTypeDeclaration() != null) {
             visit(ctx.localTypeDeclaration());
+        } else if (ctx.paraBlock() != null) {
+          visit(ctx.paraBlock());
         } else {
             visit(ctx.statement());
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitParaBlock(JavaParser.ParaBlockContext ctx) {
+        numThreads = 0;
+        int i;
+        if (ctx.paraBlockStatements() != null) {
+            visit(ctx.paraBlockStatements());
+            for (i = 0; i < numThreads; i++) {
+                printTabs();
+                out.println("Thread t" + i + " = new Thread(new Runnable" + i + "());");
+            }
+
+            for (i = 0; i < numThreads; i++) {
+                printTabs();
+                out.println("t" + i + ".start();");
+            }
+
+            printTabs();
+            out.println("try {");
+            addTab();
+
+            for (i = 0; i < numThreads; i++) {
+                printTabs();
+                out.println("t" + i + ".join();");
+            }
+            remTab();
+            printTabs();
+            out.println("} catch (InterruptedException e) {\n");
+            printTabs();
+            out.println("}");
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitParaBlockStatements(JavaParser.ParaBlockStatementsContext ctx) {
+        for (JavaParser.BlockStatementContext stmt : ctx.blockStatement()) {
+            printTabs();
+            out.println("class Runnable" + numThreads + " implements Runnable {\n");
+            addTab();
+            printTabs();
+            out.println("public void run() {");
+            addTab();
+            printTabs();
+            out.println("System.out.println(Thread.currentThread().getName() + \", executing run() method!\");");
+            printTabs();
+            visit(stmt);
+            remTab();
+            printTabs();
+            out.println("}");
+            remTab();
+            printTabs();
+            out.println("}");
+            numThreads++;
         }
         return null;
     }
@@ -1658,9 +1718,9 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitExprStmt(JavaParser.ExprStmtContext ctx) {
+        //printTabs();
         visit(ctx.expression());
         out.print(";\n");
-        printTabs();
         return null;
     }
 

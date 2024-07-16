@@ -1,4 +1,5 @@
 #!/bin/bash
+gradle clean
 mkdir -p src/generated/output
 gradle run --args="$*"
 gradle copy
@@ -14,5 +15,7 @@ if [[ "$*" == *"Main.java"* ]]
 then
     java -cp src/generated/output Main
 else
-    java -cp src/generated/output/ "$*"
+    thing="$*"
+    #echo $thing
+    java -cp src/generated/output/ ${thing//".java"}
 fi

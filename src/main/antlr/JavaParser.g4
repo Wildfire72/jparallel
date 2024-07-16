@@ -458,8 +458,17 @@ block
 blockStatement
     : localVariableDeclaration ';'
     | localTypeDeclaration
+    | paraBlock
     | statement
     ;
+
+paraBlock
+    : PARALLEL '{' paraBlockStatements '}'
+    ;       // instantiate, start and join threads after this
+
+paraBlockStatements
+    : blockStatement*
+    ;   // a runnable class for each one of the statements
 
 localVariableDeclaration
     : variableModifier* (VAR identifier '=' expression | typeType variableDeclarators)

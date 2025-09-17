@@ -1,4 +1,4 @@
-public class Medium {
+public class Sequential {
     public static void main(String[] args) {
         System.out.println("Before first parallel block");
         int x = 0;

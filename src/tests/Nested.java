@@ -1,4 +1,4 @@
-public class Hard {
+public class Nested {
     public static void main(String[] args) {
         int x = 10;
 

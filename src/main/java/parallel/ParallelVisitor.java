@@ -3,6 +3,7 @@
 import java.io.*;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
+import java.util.ArrayList;
 
 public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
@@ -11,6 +12,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     static int threadStart = 0;
     PrintWriter out;
     int tabs;
+    static ArrayList<String> localVariables = new ArrayList<String>();
 
     public ParallelVisitor(PrintWriter out) {
         this.out = out;
@@ -1490,6 +1492,10 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
             printTabs();
             out.println("class Runnable" + totalThreads + " implements Runnable {\n");
             addTab();
+            for (String s : localVariables){
+                out.println(s);
+            }
+            //localVariables=new ArrayList<String>();
             printTabs();
             out.println("public void run() {");
             addTab();
@@ -1511,20 +1517,32 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitLocalVariableDeclaration(JavaParser.LocalVariableDeclarationContext ctx) {
+        StringBuilder sb = new StringBuilder();
         if (ctx.variableModifier(0) != null) {
             for (JavaParser.VariableModifierContext modifier : ctx.variableModifier()) {
                 visit(modifier);
+                sb.append(modifier.getText()).append(" ");
             }
         }
         if (ctx.identifier() != null && ctx.expression() != null) {
+            sb.append(ctx.VAR().getText()).append(" ");
+            sb.append(ctx.identifier().getText()).append(" = ");
+            sb.append(ctx.expression().getText());
+            
             out.print(ctx.VAR().getText() + " ");
             visit(ctx.identifier());
             out.print(" = ");
             visit(ctx.expression());
         } else {
+            sb.append(ctx.typeType().getText()).append(" ");
+            sb.append(ctx.variableDeclarators().getText());
+            
             visit(ctx.typeType());
             visit(ctx.variableDeclarators());
         }
+
+        sb.append(";");
+        localVariables.add(sb.toString());
         return null;
     }
 

@@ -1493,11 +1493,18 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
             out.println("class Runnable" + totalThreads + " implements Runnable {\n");
             addTab();
             for (String s : localVariables){
-                out.println(s);
+                out.println("private " + s);
             }
             //localVariables=new ArrayList<String>();
             printTabs();
-            out.println("public void run() {");
+            String args="public void run(";
+            for (String s : localVariables){
+                args+=s+",";
+            }
+            args=args.substring(0,args.length()-1);
+            args+=") {";
+            out.println(args);
+            //out.println("public void run() {");
             addTab();
             printTabs();
             out.println("System.out.println(Thread.currentThread().getName() + \", executing run() method!\");");

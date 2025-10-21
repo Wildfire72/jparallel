@@ -1484,6 +1484,49 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         return null;
     }
 
+    private String varsToParameters(String s){
+        if (!s.contains(",")){
+            String val = removeEquals(s);
+            return val.substring(0,val.length()-1);
+        }
+        String[] parts = s.split(",");
+        String[] first = parts[0].split(" ");
+        String type = first[0]+" ";
+        String val = removeEquals(parts[0]) + ",";
+        for (int i=1;i<parts.length;i++){
+            val += type + removeEquals(parts[i]) + ",";
+        }
+        return val.substring(0,val.length()-1); //get rid of , and ;
+    }
+
+    private String removeEquals(String s){
+        if (!s.contains("=")){
+            return s;
+        }
+        String[] parts = s.split("=");
+        return parts[0];
+    }
+
+    private String varsToInstVars(String s){
+        if (!s.contains(",")){
+            String[] parts = s.split(" ");
+            String name = removeEquals(parts[1]);
+            name = name.substring(0,name.length()-1); //remove ;
+            String val = "this."+ name + " = " + name +";";
+            return val;
+        }
+        String[] parts = s.split(",");
+        String[] first = parts[0].split(" ");
+        String name = removeEquals(first[1]);
+        String val = "this." + name + " = " + name + ";";
+        for (int i=1;i<parts.length;i++){
+            name = removeEquals(parts[i]);
+            String temp = "\nthis." + name + " = " + name + ";";
+            val+=temp;
+        }
+        return val;
+    }
+
     @Override
     public Void visitParaBlockStatements(JavaParser.ParaBlockStatementsContext ctx) {
         for (JavaParser.BlockStatementContext stmt : ctx.blockStatement()) {
@@ -1497,14 +1540,19 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
             }
             //localVariables=new ArrayList<String>();
             printTabs();
-            String args="public void run(";
+            String args="Runnable" + totalThreads + "(";
             for (String s : localVariables){
-                args+=s+",";
+                args+=varsToParameters(s)+",";
             }
             args=args.substring(0,args.length()-1);
             args+=") {";
             out.println(args);
-            //out.println("public void run() {");
+            //set instance variables
+            for (String s : localVariables){
+                out.println(varsToInstVars(s));
+            }
+            out.println("}"); 
+            out.println("public void run() {");
             addTab();
             printTabs();
             out.println("System.out.println(Thread.currentThread().getName() + \", executing run() method!\");");

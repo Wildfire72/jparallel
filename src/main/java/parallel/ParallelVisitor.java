@@ -1459,7 +1459,8 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
                 printTabs();
                 out.println("Thread t" + (threadStart + i) + 
                         " = new Thread(new Runnable" +(threadStart + i) +
-                        "());");
+                        "(" + (threadArgs()) +
+                        "));");
             }
 
             for (i = 0; i < numThreads; i++) {
@@ -1482,6 +1483,38 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
             out.println("}");
         }
         return null;
+    }
+
+    private String threadArgs(){
+        if (localVariables == null){ 
+            return ""; 
+        }
+
+        String paras = "";
+        for (String s : localVariables){
+            String temp = getVarName(s);
+            temp += ", ";
+            paras += temp;
+        }
+        paras = paras.substring(0,paras.length()-2);
+        return paras;
+    }
+
+    private String getVarName(String s){
+        if (!s.contains(",")){
+            String val = removeEquals(s);
+            val = val.replace(";","");
+            String[] parts = val.split(" ");
+            return parts[1];
+        }
+        s = s.replace(";","");
+        String[] parts = s.split(",");
+        String[] first = parts[0].split(" ");
+        String val = removeEquals(first[1]) + ", ";
+        for (int i = 1; i < parts.length; i++){
+            val += removeEquals(parts[i]) + ", ";
+        }
+        return val.substring(0,val.length()-2); //get rid of , and ;
     }
 
     private String varsToParameters(String s){

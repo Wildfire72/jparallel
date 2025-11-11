@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
+    static boolean silenceOutput = false;
     static int totalThreads = 0;
     static int numThreads;
     static int threadStart = 0;
@@ -1602,12 +1603,14 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         }
         return null;
     }
-
     @Override
-    public Void visitLocalVariableDeclaration(JavaParser.LocalVariableDeclarationContext ctx) {
+    public Void visitLocalVariableDeclaration(
+            JavaParser.LocalVariableDeclarationContext ctx) {
+        silenceOutput = true;
         StringBuilder sb = new StringBuilder();
         if (ctx.variableModifier(0) != null) {
-            for (JavaParser.VariableModifierContext modifier : ctx.variableModifier()) {
+            for (JavaParser.VariableModifierContext modifier : 
+                    ctx.variableModifier()) {
                 visit(modifier);
                 sb.append(modifier.getText()).append(" ");
             }
@@ -1616,22 +1619,60 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
             sb.append(ctx.VAR().getText()).append(" ");
             sb.append(ctx.identifier().getText()).append(" = ");
             sb.append(ctx.expression().getText());
-            
-            out.print(ctx.VAR().getText() + " ");
+
+            //out.print(ctx.VAR().getText() + " ");
             visit(ctx.identifier());
-            out.print(" = ");
+            //out.print(" = ");
             visit(ctx.expression());
         } else {
             sb.append(ctx.typeType().getText()).append(" ");
             sb.append(ctx.variableDeclarators().getText());
-            
+
             visit(ctx.typeType());
             visit(ctx.variableDeclarators());
         }
-
+        silenceOutput = false;
+        out.print(initializeDefaults(sb.toString()));
         sb.append(";");
         localVariables.add(sb.toString());
+        //out.println(test+" test ");
         return null;
+    }
+
+    private String initializeDefaults(String s){
+        String[] parts = s.split(" ");
+        String type = parts[0];
+        if (!s.contains(",")){
+            if (!s.contains("=")){
+                return s + defaultVal(type);
+            }
+            return s;
+        }
+        parts = s.split(",");
+        String fin = "";
+        for (String p : parts){
+            if (p.contains("=")){
+                fin += p + ",";
+            } else{
+                fin+= p + defaultVal(type) + ",";
+            }
+        }
+        fin = fin.substring(0,fin.length()-1);
+        return fin;
+    }
+
+    private String defaultVal(String s){
+        if (s.equals("int") || s.equals("byte") || s.equals("short") ||
+                s.equals("long") || s.equals("char")){
+            return "=0";
+                }
+        if (s.equals("double") || s.equals("float")){
+            return "=0.0";
+        }
+        if (s.equals("boolean")){
+            return "=false";
+        }
+        return "=null";
     }
 
     @Override
@@ -1924,10 +1965,14 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
             visit(ctx.classOrInterfaceType());
             visit(ctx.variableDeclaratorId());
         } else {
+            if (!silenceOutput){
             out.print(ctx.VAR().getText() + " ");
+            }
             visit(ctx.identifier());
         }
+        if (!silenceOutput){
         out.print(" = ");
+        }
         visit(ctx.expression());
         return null;
     }
@@ -2778,4 +2823,4 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         return null;
     }
 }
- 
+

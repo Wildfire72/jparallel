@@ -8,7 +8,7 @@ public class vars {
         byte b3 = 0;
         double d=0,d1;
         double d2;
-        double d2 = 3.2;
+        double d3 = 3.2;
         short h,h1=0;
         short h2 = 1;
         short h3;
@@ -17,7 +17,7 @@ public class vars {
         long l3 = 1;
         float f,f1;
         float f2;
-        float f3 = 1.32;
+        float f3 = 1.32f;
         char c,c1;
         char c2;
         char c3 = 4;

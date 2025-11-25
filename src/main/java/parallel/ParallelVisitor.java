@@ -14,6 +14,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     PrintWriter out;
     int tabs;
     static ArrayList<String> localVariables = new ArrayList<String>();
+    static ArrayList<String> assignedVariables = new ArrayList<String>();
 
     public ParallelVisitor(PrintWriter out) {
         this.out = out;
@@ -1458,10 +1459,13 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
             visit(ctx.paraBlockStatements());
             for (i = 0; i < numThreads; i++) {
                 printTabs();
+                out.println("Runnable" + (threadStart + i) + " run" + 
+                        (threadStart + i) + " = new Runnable" +
+                        (threadStart + i) + "(" + (threadArgs()) +
+                        ");");
                 out.println("Thread t" + (threadStart + i) + 
-                        " = new Thread(new Runnable" +(threadStart + i) +
-                        "(" + (threadArgs()) +
-                        "));");
+                        " = new Thread(run" + (threadStart + i) +
+                        ");");
             }
 
             for (i = 0; i < numThreads; i++) {
@@ -1476,6 +1480,12 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
             for (i = 0; i < numThreads; i++) {
                 printTabs();
                 out.println("t" + (threadStart + i) + ".join();");
+            }
+            for (i =0; i < numThreads; i++) {
+                printTabs();
+                out.println(assignedVariables.get(i) + " = run" + 
+                        (threadStart + i) + "." + 
+                        assignedVariables.get(i) + ";");
             }
             remTab();
             printTabs();
@@ -1570,7 +1580,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
             out.println("class Runnable" + totalThreads + " implements Runnable {\n");
             addTab();
             for (String s : localVariables){
-                out.println("private " + s);
+                out.println("public " + s);
             }
             //localVariables=new ArrayList<String>();
             printTabs();
@@ -2322,6 +2332,8 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitAssignExpr(JavaParser.AssignExprContext ctx) {
         visit(ctx.expression(0));
+        assignedVariables.add(ctx.expression(0).getText());
+        //out.print(" "+ctx.expression(0).getText()+" ");
         out.print(ctx.bop.getText() + " ");
         visit(ctx.expression(1));
         return null;

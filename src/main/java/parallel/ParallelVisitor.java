@@ -1641,9 +1641,9 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
             String line = type + " " + vName + " = " + initText;
             if (!inForLoop){
                line+=";";
+               localVariables.add(line);
             }
             out.println(line);
-            localVariables.add(line);
         }
         return null;
     }

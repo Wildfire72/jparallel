@@ -459,6 +459,7 @@ blockStatement
     : localVariableDeclaration ';'
     | localTypeDeclaration
     | paraBlock
+    | paraForBlock
     | statement
     ;
 
@@ -469,6 +470,25 @@ paraBlock
 paraBlockStatements
     : blockStatement*
     ;   // a runnable class for each one of the statements
+
+paraForBlock
+    : PARALLELFOR '(' paraForControl ')' THREADS '(' integerLiteral ')'
+     '{' paraForStatements '}'
+    ; //defines a parrallel for loop; start and join threads after this
+
+paraForControl
+    : localVariableDeclaration ';' expression? ';' 
+        forUpdate=expressionList?
+    ; //modified forControl to simplify possibilities
+
+paraForInit
+    : localVariableDeclaration
+    | expressionList
+    ;
+
+paraForStatements
+    : blockStatement*
+    ; //a for loop with the content of the parallel for
 
 localVariableDeclaration
     : variableModifier* (VAR identifier '=' expression | typeType variableDeclarators)

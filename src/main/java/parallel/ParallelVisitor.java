@@ -1444,6 +1444,8 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
             visit(ctx.localTypeDeclaration());
         } else if (ctx.paraBlock() != null) {
           visit(ctx.paraBlock());
+        } else if (ctx.paraForBlock() != null){
+            visit(ctx.paraForBlock());
         } else {
             visit(ctx.statement());
         }
@@ -1496,6 +1498,53 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         return null;
     }
 
+    @Override
+    public Void visitParaForBlock(JavaParser.ParaForBlockContext ctx) {
+        /*numThreads = 0;
+        threadStart = totalThreads;
+        int i;*/
+        if (ctx.paraForStatements() != null) {
+            visit(ctx.paraForStatements());
+            out.println("In a parallel for loop!");
+            /*
+            for (i = 0; i < numThreads; i++) {
+                printTabs();
+                out.println("Runnable" + (threadStart + i) + " run" + 
+                        (threadStart + i) + " = new Runnable" +
+                        (threadStart + i) + "(" + (threadArgs()) +
+                        ");");
+                out.println("Thread t" + (threadStart + i) + 
+                        " = new Thread(run" + (threadStart + i) +
+                        ");");
+            }
+
+            for (i = 0; i < numThreads; i++) {
+                printTabs();
+                out.println("t" + (threadStart + i) + ".start();");
+            }
+
+            printTabs();
+            out.println("try {");
+            addTab();
+
+            for (i = 0; i < numThreads; i++) {
+                printTabs();
+                out.println("t" + (threadStart + i) + ".join();");
+            }
+            for (i =0; i < numThreads; i++) {
+                printTabs();
+                out.println(assignedVariables.get(i) + " = run" + 
+                        (threadStart + i) + "." + 
+                        assignedVariables.get(i) + ";");
+            }
+            remTab();
+            printTabs();
+            out.println("} catch (InterruptedException e) {\n");
+            printTabs();
+            out.println("}"); */
+        }
+        return null;
+    }
     private String threadArgs(){
         if (localVariables == null){ 
             return ""; 

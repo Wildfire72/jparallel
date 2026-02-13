@@ -84,6 +84,8 @@ VOID:               'void';
 VOLATILE:           'volatile';
 WHILE:              'while';
 PARALLEL:           'parallel';
+PARALLELFOR:       'parallelfor';
+THREADS:            'threads';
 
 // Module related keywords
 MODULE:             'module';

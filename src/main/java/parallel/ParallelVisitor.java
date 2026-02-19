@@ -1500,51 +1500,134 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
     @Override
     public Void visitParaForBlock(JavaParser.ParaForBlockContext ctx) {
-        /*numThreads = 0;
-        threadStart = totalThreads;
-        int i;*/
-        if (ctx.paraForStatements() != null) {
-            visit(ctx.paraForStatements());
-            out.println("In a parallel for loop!");
-            /*
-            for (i = 0; i < numThreads; i++) {
-                printTabs();
-                out.println("Runnable" + (threadStart + i) + " run" + 
-                        (threadStart + i) + " = new Runnable" +
-                        (threadStart + i) + "(" + (threadArgs()) +
-                        ");");
-                out.println("Thread t" + (threadStart + i) + 
-                        " = new Thread(run" + (threadStart + i) +
-                        ");");
-            }
+        JavaParser.ParaForControlContext control = ctx.paraForControl();
+        int threadCount = Integer.parseInt(
+                ctx.integerLiteral().getText());
+        
+        makeRunnables(control,threadCount,ctx);
+    
+        int i;
+        //make structure
+        for (i = 0; i < numThreads; i++) {
+            printTabs();
+            out.println("Runnable" + (threadStart + i) + " run" + 
+                    (threadStart + i) + " = new Runnable" +
+                    (threadStart + i) + "(" + (threadArgs()) +
+                    ");");
+            out.println("Thread t" + (threadStart + i) + 
+                    " = new Thread(run" + (threadStart + i) +
+                    ");");
+        }
 
-            for (i = 0; i < numThreads; i++) {
-                printTabs();
-                out.println("t" + (threadStart + i) + ".start();");
+        for (i = 0; i < numThreads; i++) {
+            printTabs();
+            out.println("t" + (threadStart + i) + ".start();");
+        }
+
+        printTabs();
+        out.println("try {");
+        addTab();
+
+        for (i = 0; i < numThreads; i++) {
+            printTabs();
+            out.println("t" + (threadStart + i) + ".join();");
+        }
+        for (i =0; i < numThreads; i++) {
+            printTabs();
+            out.println(assignedVariables.get(i) + " = run" + 
+                    (threadStart + i) + "." + 
+                    assignedVariables.get(i) + ";");
+        }
+        remTab();
+        printTabs();
+        out.println("} catch (InterruptedException e) {\n");
+        printTabs();
+        out.println("}");
+
+        return null;
+    }
+
+    private void makeRunnables(JavaParser.ParaForControlContext control,
+            int threadCount, JavaParser.ParaForBlockContext ctx){
+
+        //TODO: change condition and init for each thread
+        //
+        for (int i = 0; i<threadCount; i++){
+
+            out.println("class Runnable" + totalThreads + 
+                    " implements Runnable {\n");
+            addTab();
+            for (String s : localVariables){
+                out.println("public " + s);
             }
+            //localVariables=new ArrayList<String>();
+            printTabs();
+            String args="Runnable" + totalThreads + "(";
+            for (String s : localVariables){
+                args+=varsToParameters(s)+",";
+            }
+            args=args.substring(0,args.length()-1);
+            args+=") {";
+            out.println(args);
+            //set instance variables
+            for (String s : localVariables){
+                out.println(varsToInstVars(s));
+            }
+            out.println("}"); 
+            out.println("public void run() {");
+            addTab();
+            printTabs();
+            out.println("System.out.println(Thread.currentThread()"+
+                    ".getName() + \", executing run() method!\");");
+
+            //for syntax
+            out.print("for (");
+
+            //init
+            if (control.localVariableDeclaration() != null){
+                visit(control.localVariableDeclaration());
+            }
+            //out.print("; ");
+
+            //expression
+            if (control.expression() != null){
+                visit(control.expression());
+            }
+            out.print("; ");
+
+            //forUpdate
+            if (control.forUpdate != null){
+                visit(control.forUpdate);
+            }
+            out.println("){");
+            if (ctx.paraForStatements() != null) {
+                visit(ctx.paraForStatements());
+                out.println("System.out.println(\"In a parallel" +
+                        " for loop!\");");
+            }
+            out.println("}");
 
             printTabs();
-            out.println("try {");
-            addTab();
 
-            for (i = 0; i < numThreads; i++) {
-                printTabs();
-                out.println("t" + (threadStart + i) + ".join();");
-            }
-            for (i =0; i < numThreads; i++) {
-                printTabs();
-                out.println(assignedVariables.get(i) + " = run" + 
-                        (threadStart + i) + "." + 
-                        assignedVariables.get(i) + ";");
-            }
+            visit(ctx.paraForStatements());
             remTab();
             printTabs();
-            out.println("} catch (InterruptedException e) {\n");
+            out.println("}");
+            remTab();
             printTabs();
-            out.println("}"); */
+            out.println("}");
+        }
+    }
+
+    public Void visitParaForStatements(
+            JavaParser.ParaForStatementsContext ctx) {
+        for (JavaParser.BlockStatementContext stmt : 
+                ctx.blockStatement()) {
+            visit(stmt);
         }
         return null;
     }
+     
     private String threadArgs(){
         if (localVariables == null){ 
             return ""; 
@@ -1666,16 +1749,16 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitLocalVariableDeclaration(
             JavaParser.LocalVariableDeclarationContext ctx) {
-        
+
         String type;
         if (ctx.VAR() != null){
             type = "var";
         } else{
             type = ctx.typeType().getText();
         }
-        
+
         for (JavaParser.VariableDeclaratorContext decl :
-        ctx.variableDeclarators().variableDeclarator()){
+                ctx.variableDeclarators().variableDeclarator()){
             String vName = decl.variableDeclaratorId().getText();
             String initText = null;
 
@@ -1689,13 +1772,13 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
             String line = type + " " + vName + " = " + initText;
             if (!inForLoop){
-               line+=";";
-               localVariables.add(line);
+                line+=";";
+                localVariables.add(line);
             }
             out.println(line);
-        }
+                }
         return null;
-    }
+            }
 
     private String defaultVal(String s){
         if (s.equals("int") || s.equals("byte") || s.equals("short") ||

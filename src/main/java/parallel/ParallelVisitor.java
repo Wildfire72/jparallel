@@ -1483,11 +1483,14 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
                 printTabs();
                 out.println("t" + (threadStart + i) + ".join();");
             }
-            for (i =0; i < numThreads; i++) {
-                printTabs();
-                out.println(assignedVariables.get(i) + " = run" + 
-                        (threadStart + i) + "." + 
-                        assignedVariables.get(i) + ";");
+            if (assignedVariables != null && 
+                    assignedVariables.size() > 0){
+                for (i =0; i < numThreads; i++) {
+                    printTabs();
+                    out.println(assignedVariables.get(i) + " = run" + 
+                            (threadStart + i) + "." + 
+                            assignedVariables.get(i) + ";");
+                }
             }
             remTab();
             printTabs();
@@ -1504,11 +1507,12 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         int threadCount = Integer.parseInt(
                 ctx.integerLiteral().getText());
         
+        inForLoop=true;
         makeRunnables(control,threadCount,ctx);
     
         int i;
         //make structure
-        for (i = 0; i < numThreads; i++) {
+        for (i = 0; i < threadCount; i++) {
             printTabs();
             out.println("Runnable" + (threadStart + i) + " run" + 
                     (threadStart + i) + " = new Runnable" +
@@ -1519,7 +1523,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
                     ");");
         }
 
-        for (i = 0; i < numThreads; i++) {
+        for (i = 0; i < threadCount; i++) {
             printTabs();
             out.println("t" + (threadStart + i) + ".start();");
         }
@@ -1528,22 +1532,23 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         out.println("try {");
         addTab();
 
-        for (i = 0; i < numThreads; i++) {
+        for (i = 0; i < threadCount; i++) {
             printTabs();
             out.println("t" + (threadStart + i) + ".join();");
         }
-        for (i =0; i < numThreads; i++) {
+        /*
+        for (i =0; i < threadCount; i++) {
             printTabs();
             out.println(assignedVariables.get(i) + " = run" + 
                     (threadStart + i) + "." + 
                     assignedVariables.get(i) + ";");
-        }
+        }*/
         remTab();
         printTabs();
         out.println("} catch (InterruptedException e) {\n");
         printTabs();
         out.println("}");
-
+        inForLoop=false;
         return null;
     }
 
@@ -1552,7 +1557,27 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
         //TODO: change condition and init for each thread
         //
+        //initial assumptions: i=0 every time, always += something
+        
+        int initial = Integer.parseInt(control.localVariableDeclaration().
+                variableDeclarators().variableDeclarator(0).
+                variableInitializer().getText());
+        int stop = Integer.parseInt(control.expression().getChild(2).
+                getText()); 
+        //out.print("THERE!");
+        //assume 0 -> +N
+        int chunks = (stop-initial)/threadCount;
+
+        int remainder = (stop-initial)%threadCount;
         for (int i = 0; i<threadCount; i++){
+
+            //out.print("HERE!");
+            
+            int tstart = initial + (i*chunks);
+            int tend = initial + (i+1)*chunks;
+            if (i == threadCount-1){
+                tend += remainder;
+            }
 
             out.println("class Runnable" + totalThreads + 
                     " implements Runnable {\n");
@@ -1566,7 +1591,9 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
             for (String s : localVariables){
                 args+=varsToParameters(s)+",";
             }
-            args=args.substring(0,args.length()-1);
+            if (localVariables.size()>0){
+                args=args.substring(0,args.length()-1);
+            }
             args+=") {";
             out.println(args);
             //set instance variables
@@ -1584,15 +1611,14 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
             out.print("for (");
 
             //init
-            if (control.localVariableDeclaration() != null){
-                visit(control.localVariableDeclaration());
-            }
-            //out.print("; ");
+            String Iname = control.localVariableDeclaration().
+                variableDeclarators().variableDeclarator(0).
+                variableDeclaratorId().getText();
+            out.print("int " + Iname + "=" + tstart + "; ");
 
             //expression
-            if (control.expression() != null){
-                visit(control.expression());
-            }
+            String op = control.expression().getChild(1).getText();
+            out.print(Iname + op + tend);
             out.print("; ");
 
             //forUpdate
@@ -1602,20 +1628,21 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
             out.println("){");
             if (ctx.paraForStatements() != null) {
                 visit(ctx.paraForStatements());
-                out.println("System.out.println(\"In a parallel" +
-                        " for loop!\");");
+               // out.println("System.out.println(\"In a parallel" +
+                 //       " for loop!\");");
             }
             out.println("}");
 
             printTabs();
 
-            visit(ctx.paraForStatements());
+            //visit(ctx.paraForStatements());
             remTab();
             printTabs();
             out.println("}");
             remTab();
             printTabs();
             out.println("}");
+            totalThreads++;
         }
     }
 
@@ -1629,7 +1656,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     }
      
     private String threadArgs(){
-        if (localVariables == null){ 
+        if (localVariables == null || localVariables.size() == 0){ 
             return ""; 
         }
 
@@ -1720,7 +1747,9 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
             for (String s : localVariables){
                 args+=varsToParameters(s)+",";
             }
-            args=args.substring(0,args.length()-1);
+            if (localVariables.size()>0){
+                args=args.substring(0,args.length()-1);
+            }
             args+=") {";
             out.println(args);
             //set instance variables

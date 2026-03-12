@@ -473,7 +473,7 @@ paraBlockStatements
 
 paraForBlock
     : PARALLELFOR '(' paraForControl ')' THREADS '(' integerLiteral ')'
-     '{' paraForStatements '}'
+     reductSect? '{' paraForStatements '}'
     ; //defines a parrallel for loop; start and join threads after this
 
 paraForControl
@@ -489,6 +489,26 @@ paraForInit
 paraForStatements
     : blockStatement*
     ; //a for loop with the content of the parallel for
+
+reductSect
+    : REDUCTION '(' reductStatement ')'
+    ;
+
+reductStatement
+    : reductChar ':' IDENTIFIER
+    ;
+
+reductChar
+    : ADD       #sum
+    | MUL       #product
+    | MIN       #min
+    | MAX       #max
+    | AND       #and
+    | OR        #or
+    | BITAND    #bit_and
+    | BITOR     #bit_or
+    | CARET     #bit_xor
+    ;
 
 localVariableDeclaration
     : variableModifier* (VAR identifier '=' expression | typeType variableDeclarators)

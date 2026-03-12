@@ -1508,6 +1508,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
                 ctx.integerLiteral().getText());
         
         inForLoop=true;
+        //out.println("HERE");
         makeRunnables(control,threadCount,ctx);
     
         int i;
@@ -1559,24 +1560,24 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         //
         //initial assumptions: i=0 every time, always += something
         
-        int initial = Integer.parseInt(control.localVariableDeclaration().
-                variableDeclarators().variableDeclarator(0).
-                variableInitializer().getText());
-        int stop = Integer.parseInt(control.expression().getChild(2).
-                getText()); 
-        //out.print("THERE!");
+        String initial = control.
+                localVariableDeclaration().variableDeclarators().
+                variableDeclarator(0).variableInitializer().getText();
+        //out.println(control.expression().getChild(2).getText());
+        //
+        String stop = control.expression().getChild(2).getText(); 
+        //out.println("THERE!");
         //assume 0 -> +N
-        int chunks = (stop-initial)/threadCount;
+        String chunks = "("+stop+"-"+initial+")/"+threadCount;
 
-        int remainder = (stop-initial)%threadCount;
+        String remainder = "("+stop+"-"+initial+")%"+threadCount;
         for (int i = 0; i<threadCount; i++){
 
-            //out.print("HERE!");
             
-            int tstart = initial + (i*chunks);
-            int tend = initial + (i+1)*chunks;
+            String tstart = initial+"+("+i+"*"+chunks+")";
+            String tend = initial+"+("+i+"+1)*"+chunks;
             if (i == threadCount-1){
-                tend += remainder;
+                tend += "+"+remainder;
             }
 
             out.println("class Runnable" + totalThreads + 

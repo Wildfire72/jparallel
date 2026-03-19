@@ -13,7 +13,9 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     static int threadStart = 0;
     PrintWriter out;
     int tabs;
+    //variables will be stored as name=value
     static ArrayList<String> localVariables = new ArrayList<String>();
+    static ArrayList<String> localVariableNames = new ArrayList<String>();
     static ArrayList<String> assignedVariables = new ArrayList<String>();
 
     public ParallelVisitor(PrintWriter out) {
@@ -747,6 +749,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitVariableDeclaratorId(JavaParser.VariableDeclaratorIdContext ctx) {
         visit(ctx.identifier());
+        localVariableNames.add(ctx.identifier().getText());
         for (int i = 0; i < ctx.LBRACK().size(); i++) {
             out.print(ctx.LBRACK(i).getText() + ctx.RBRACK(i).getText());
         }
@@ -1544,6 +1547,26 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
                     (threadStart + i) + "." + 
                     assignedVariables.get(i) + ";");
         }*/
+
+        if (ctx.reductSection().reductStatement() != null){
+            String reductChar  = ctx.reductSection().reductStatement()
+                .reductChar().getText();
+            String varName = ctx.reductSection().reductStatement()
+                .getChild(2).getText();
+            if (reductChar.length()<3){ //just put everything together
+                String fin = varName +" = ";
+                for (i=0; i < threadCount; i++){
+                    fin += "run"+i+"."+varName;
+                    if (i < threadCount-1){
+                        fin += reductChar;
+                    }
+                }
+                fin+=";";
+                out.println(fin);
+            } else{ //min and max
+
+            }
+        }
         remTab();
         printTabs();
         out.println("} catch (InterruptedException e) {\n");
@@ -1655,6 +1678,11 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         }
         return null;
     }
+
+    public Void visitReductSection(JavaParser.ReductSectionContext ctx){
+        
+        return null;
+    }
      
     private String threadArgs(){
         if (localVariables == null || localVariables.size() == 0){ 
@@ -1663,71 +1691,34 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
 
         String paras = "";
         for (String s : localVariables){
-            String temp = getVarName(s);
-            temp += ", ";
-            paras += temp;
+            if (s.contains("=")){
+                String[] parts = s.split("=");
+                s = parts[0].strip(); //type name
+            }
+            String[] parts = s.split(" ");
+            String name = parts[1];
+            paras += name+",";
         }
-        paras = paras.substring(0,paras.length()-2);
-        return paras;
-    }
-
-    private String getVarName(String s){
-        if (!s.contains(",")){
-            String val = removeEquals(s);
-            val = val.replace(";","");
-            String[] parts = val.split(" ");
-            return parts[1];
-        }
-        s = s.replace(";","");
-        String[] parts = s.split(",");
-        String[] first = parts[0].split(" ");
-        String val = removeEquals(first[1]) + ", ";
-        for (int i = 1; i < parts.length; i++){
-            val += removeEquals(parts[i]) + ", ";
-        }
-        return val.substring(0,val.length()-2); //get rid of , and ;
+        return paras.substring(0,paras.length()-1);
     }
 
     private String varsToParameters(String s){
-        if (!s.contains(",")){
-            String val = removeEquals(s);
-            return val.substring(0,val.length()-1);
+        if (s.contains("=")){
+            String[] parts = s.split("=");
+            return parts[0];
         }
-        String[] parts = s.split(",");
-        String[] first = parts[0].split(" ");
-        String type = first[0]+" ";
-        String val = removeEquals(parts[0]) + ",";
-        for (int i=1;i<parts.length;i++){
-            val += type + removeEquals(parts[i]) + ",";
-        }
-        return val.substring(0,val.length()-1); //get rid of , and ;
-    }
-
-    private String removeEquals(String s){
-        if (!s.contains("=")){
-            return s;
-        }
-        String[] parts = s.split("=");
-        return parts[0];
+        return s.substring(0,s.length()-1); //get rid of , and ;
     }
 
     private String varsToInstVars(String s){
-        if (!s.contains(",")){
-            String[] parts = s.split(" ");
-            String name = removeEquals(parts[1]);
-            name = name.substring(0,name.length()); 
-            String val = "this."+ name + " = " + name +";";
-            return val;
+        String val = "this.";
+        if (s.contains("=")){
+            String[] parts = s.split("=");
+            s = parts[0].strip(); //type name
         }
-        String[] parts = s.split(",");
-        String[] first = parts[0].split(" ");
-        String name = removeEquals(first[1]);
-        String val = "this." + name + " = " + name + ";";
-        for (int i=1;i<parts.length;i++){
-            name = removeEquals(parts[i]);
-            String temp = "\nthis." + name + " = " + name + ";";
-            val+=temp;
-        }
+        String[] parts = s.split(" ");
+        String name = parts[1];
+        val += name + " = " + name + ";";
         return val;
     }
 

@@ -1,7 +1,6 @@
 public class reductions {
     public static void main(String args[]) {               
-        int sum=0;
-        int prod=1;
+        int sum=0,prod=1;
         int mi=100;
         int ma=0;
         boolean and = false;
@@ -16,7 +15,9 @@ public class reductions {
             reduction(+:sum){
                 sum+=nums[i];
             }
-        
+
+        System.out.println("Sum = "+sum);
+/*        
         parallelfor (int i=0;i<nums.length;i++) threads(2) 
             reduction(*:prod){
                 prod*=nums[i];
@@ -53,5 +54,6 @@ public class reductions {
             reduction(^:bit_xor){
                 bit_xor = bit_xor ^ nums[i];
             }
+    */
     }
 }

@@ -473,7 +473,7 @@ paraBlockStatements
 
 paraForBlock
     : PARALLELFOR '(' paraForControl ')' THREADS '(' integerLiteral ')'
-     reductSect? '{' paraForStatements '}'
+     reductSection? '{' paraForStatements '}'
     ; //defines a parrallel for loop; start and join threads after this
 
 paraForControl
@@ -490,7 +490,7 @@ paraForStatements
     : blockStatement*
     ; //a for loop with the content of the parallel for
 
-reductSect
+reductSection
     : REDUCTION '(' reductStatement ')'
     ;
 

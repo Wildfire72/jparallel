@@ -46,7 +46,7 @@ public class Main {
             }
 
             JavaParserBaseVisitor visitors[] = {
-                    new ParallelVisitor(out)
+                    new ParallelVisitor(out,tokens)
             };
 
             for (JavaParserBaseVisitor visitor : visitors) {

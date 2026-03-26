@@ -10,19 +10,18 @@ public class reductions {
         int bit_xor = 1;
 
         int[] nums = {1,2,3,4};
+        boolean[] vals = {true,true,false,true,true};
         
         parallelfor (int i=0;i<nums.length;i++) threads(2) 
             reduction(+:sum){
                 sum+=nums[i];
             }
 
-        System.out.println("Sum = "+sum);
-/*        
         parallelfor (int i=0;i<nums.length;i++) threads(2) 
             reduction(*:prod){
                 prod*=nums[i];
             }
-        parallelfor (int i=0;i<nums.length;i++) threads(2) 
+            parallelfor (int i=0;i<nums.length;i++) threads(2) 
             reduction(min:mi){
                 if (mi>nums[i]){
                     mi = nums[i];
@@ -36,11 +35,11 @@ public class reductions {
             }
         parallelfor (int i=0;i<nums.length;i++) threads(2) 
             reduction(&&:and){
-                and = and && nums[i];
+                and = and && vals[i];
             }
         parallelfor (int i=0;i<nums.length;i++) threads(2) 
             reduction(||:or){
-                or = or || nums[i];
+                or = or || vals[i];
             }
         parallelfor (int i=0;i<nums.length;i++) threads(2) 
             reduction(&:bit_and){
@@ -54,6 +53,11 @@ public class reductions {
             reduction(^:bit_xor){
                 bit_xor = bit_xor ^ nums[i];
             }
-    */
+
+
+        System.out.println("Sum = "+sum);
+        System.out.println("Prod = "+prod);
+        System.out.println("Min = "+mi);
+        System.out.println("Max = "+ma);
     }
 }

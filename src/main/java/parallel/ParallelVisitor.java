@@ -12,14 +12,15 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     static int numThreads;
     static int threadStart = 0;
     PrintWriter out;
+    CommonTokenStream tokens;
     int tabs;
     //variables will be stored as name=value
     static ArrayList<String> localVariables = new ArrayList<String>();
-    static ArrayList<String> localVariableNames = new ArrayList<String>();
     static ArrayList<String> assignedVariables = new ArrayList<String>();
 
-    public ParallelVisitor(PrintWriter out) {
+    public ParallelVisitor(PrintWriter out, CommonTokenStream tokens) {
         this.out = out;
+        this.tokens = tokens;
         this.tabs = 0;
     }
 
@@ -749,7 +750,6 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
     @Override
     public Void visitVariableDeclaratorId(JavaParser.VariableDeclaratorIdContext ctx) {
         visit(ctx.identifier());
-        localVariableNames.add(ctx.identifier().getText());
         for (int i = 0; i < ctx.LBRACK().size(); i++) {
             out.print(ctx.LBRACK(i).getText() + ctx.RBRACK(i).getText());
         }
@@ -1510,6 +1510,8 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         int threadCount = Integer.parseInt(
                 ctx.integerLiteral().getText());
         
+        threadStart = totalThreads;
+        
         inForLoop=true;
         //out.println("HERE");
         makeRunnables(control,threadCount,ctx);
@@ -1518,6 +1520,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
         //make structure
         for (i = 0; i < threadCount; i++) {
             printTabs();
+        //    out.println("threadStart = "+threadStart);
             out.println("Runnable" + (threadStart + i) + " run" + 
                     (threadStart + i) + " = new Runnable" +
                     (threadStart + i) + "(" + (threadArgs()) +
@@ -1548,7 +1551,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
                     assignedVariables.get(i) + ";");
         }*/
 
-        if (ctx.reductSection().reductStatement() != null){
+        if (ctx.reductSection() != null){
             String reductChar  = ctx.reductSection().reductStatement()
                 .reductChar().getText();
             String varName = ctx.reductSection().reductStatement()
@@ -1556,7 +1559,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
             if (reductChar.length()<3){ //just put everything together
                 String fin = varName +" = ";
                 for (i=0; i < threadCount; i++){
-                    fin += "run"+i+"."+varName;
+                    fin += "run"+(threadStart+i)+"."+varName;
                     if (i < threadCount-1){
                         fin += reductChar;
                     }
@@ -1564,7 +1567,19 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
                 fin+=";";
                 out.println(fin);
             } else{ //min and max
-
+                out.println(varName+" = run"+(threadStart)+"."+
+                        varName+";");
+                char minMax = '<';
+                if (reductChar.equals("min")){
+                    minMax = '>';
+                }
+                for (i=1;i<threadCount;i++){
+                    out.println("if ("+varName+minMax+"run"+
+                            (threadStart+i)+"."+varName+"){");
+                    out.println(varName+" = run"+(threadStart+i)+"."+
+                            varName+";");
+                    out.println("}");
+                }
             }
         }
         remTab();
@@ -1784,7 +1799,7 @@ public class ParallelVisitor extends JavaParserBaseVisitor<Void> {
             String initText = null;
 
             if (decl.variableInitializer() !=null){
-                initText = decl.variableInitializer().getText();
+                initText = tokens.getText(decl.variableInitializer());
             }
 
             if (initText == null){
